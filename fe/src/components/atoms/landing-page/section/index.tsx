@@ -19,7 +19,7 @@ const Section = () => {
             size="lg"
             className="h-16 px-12 text-xl font-bold bg-primary hover:bg-primary/90 shadow-xl shadow-primary/40 group inline-flex items-center justify-center gap-2 whitespace-nowrap"
             icon={<ArrowRight size={20} />}
-            onClick={() => route.push("/home")}
+            onClick={() => route.push("/app")}
           >
             Bắt đầu học ngay
           </Button>

@@ -24,7 +24,7 @@ export const CardContent = ({
   ...props
 }: CardContentProps) => {
   return (
-    <div className={`p-8 ${className}`} {...props}>
+    <div className={`p-6 ${className}`} {...props}>
       {children}
     </div>
   );

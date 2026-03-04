@@ -35,7 +35,7 @@ const Banner = () => {
             <Button
               size="lg"
               variant="outline"
-              className="h-14 px-8 text-lg font-bold border-2 bg-white shadow-none text-black!"
+              className="h-14 px-8 text-lg font-bold border-2 bg-white shadow-none text-black! hover:bg-gray-300!"
             >
               Xem video giới thiệu
             </Button>

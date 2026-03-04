@@ -34,7 +34,7 @@ const Header = () => {
         <Link href="/home">
           <button className="font-semibold cursor-pointer">Đăng nhập</button>
         </Link>
-        <Button onClick={() => router.push("/home")}>Bắt đầu học ngay</Button>
+        <Button onClick={() => router.push("/app")}>Bắt đầu học ngay</Button>
       </div>
     </nav>
   );
