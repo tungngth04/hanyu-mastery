@@ -16,6 +16,7 @@ const SideBar = () => {
 
   const navItems = [
     { label: "Tổng quan", icon: BookOpen, href: "/app" },
+    { label: "Từ vựng theo chủ đề", icon: Layers, href: "/vocabulary" },
     { label: "Flashcards", icon: Layers, href: "/flashcards" },
     { label: "Luyện phát âm", icon: Mic, href: "/pronunciation" },
     { label: "Học qua video", icon: Video, href: "/video" },
