@@ -21,13 +21,13 @@ const Header = () => {
           Tính năng
         </a>
         <a
-          href="#testimonials"
+          href="#evaluate"
           className="hover:text-primary transition-colors"
         >
           Đánh giá
         </a>
-        <a href="#pricing" className="hover:text-primary transition-colors">
-          Học phí
+        <a href="/support" className="hover:text-primary transition-colors">
+          Liên hệ
         </a>
       </div>
       <div className="flex items-center gap-4">

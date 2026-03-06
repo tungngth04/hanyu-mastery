@@ -1,6 +1,7 @@
 "use client";
 
 import Banner from "../../atoms/landing-page/banner";
+import Evaluate from "../../atoms/landing-page/evaluate/inedx";
 import Features from "../../atoms/landing-page/features";
 import Footer from "../../atoms/landing-page/footer";
 import Header from "../../atoms/landing-page/header";
@@ -13,6 +14,7 @@ const LandingPage: React.FC = () => {
       <Header />
       <Banner />
       <Features />
+      <Evaluate />
       <Stats />
       <Section />
       <Footer />

@@ -61,7 +61,7 @@ const Banner = () => {
         </div>
 
         <div className="relativezoom-in delay-200">
-          <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl border-8 border-white">
+          <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl border-8 border-white hover:scale-110 transition-transform hover:shadow-3xl">
             <Image
               src="/Images/banner.jpg"
               alt="banner img"

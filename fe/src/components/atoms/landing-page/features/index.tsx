@@ -9,6 +9,44 @@ import {
 import { Card, CardContent } from "../../card";
 
 const Features = () => {
+  const features = [
+    {
+      title: "Từ vựng theo chủ đề",
+      desc: "Học qua hình ảnh và âm thanh sống động, ghi nhớ sâu hơn.",
+      icon: Globe,
+      color: "bg-blue-500",
+    },
+    {
+      title: "Flashcard AI thông minh",
+      desc: "Tự động sắp xếp lịch ôn tập dựa trên mức độ ghi nhớ của bạn.",
+      icon: Zap,
+      color: "bg-amber-500",
+    },
+    {
+      title: "Luyện phát âm AI",
+      desc: "Nhận diện lỗi sai thanh điệu và sửa lỗi ngay lập tức.",
+      icon: MessageCircle,
+      color: "bg-emerald-500",
+    },
+    {
+      title: "Học qua video thực tế",
+      desc: "Hàng ngàn video tình huống thực tế, phim ảnh và bài hát.",
+      icon: PlayCircle,
+      color: "bg-rose-500",
+    },
+    {
+      title: "Ngữ pháp trực quan",
+      desc: "Các điểm ngữ pháp khó hiểu được minh họa đơn giản, dễ nhớ.",
+      icon: CheckCircle2,
+      color: "bg-purple-500",
+    },
+    {
+      title: "Luyện thi HSK chuẩn",
+      desc: "Ngân hàng đề thi khổng lồ, bám sát cấu trúc thi thật.",
+      icon: Award,
+      color: "bg-indigo-500",
+    },
+  ];
   return (
     <section id="features" className="py-24 px-6 bg-slate-50">
       <div className="max-w-7xl mx-auto">
@@ -22,44 +60,7 @@ const Features = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[
-            {
-              title: "Từ vựng theo chủ đề",
-              desc: "Học qua hình ảnh và âm thanh sống động, ghi nhớ sâu hơn.",
-              icon: Globe,
-              color: "bg-blue-500",
-            },
-            {
-              title: "Flashcard AI thông minh",
-              desc: "Tự động sắp xếp lịch ôn tập dựa trên mức độ ghi nhớ của bạn.",
-              icon: Zap,
-              color: "bg-amber-500",
-            },
-            {
-              title: "Luyện phát âm AI",
-              desc: "Nhận diện lỗi sai thanh điệu và sửa lỗi ngay lập tức.",
-              icon: MessageCircle,
-              color: "bg-emerald-500",
-            },
-            {
-              title: "Học qua video thực tế",
-              desc: "Hàng ngàn video tình huống thực tế, phim ảnh và bài hát.",
-              icon: PlayCircle,
-              color: "bg-rose-500",
-            },
-            {
-              title: "Ngữ pháp trực quan",
-              desc: "Các điểm ngữ pháp khó hiểu được minh họa đơn giản, dễ nhớ.",
-              icon: CheckCircle2,
-              color: "bg-purple-500",
-            },
-            {
-              title: "Luyện thi HSK chuẩn",
-              desc: "Ngân hàng đề thi khổng lồ, bám sát cấu trúc thi thật.",
-              icon: Award,
-              color: "bg-indigo-500",
-            },
-          ].map((f, i) => (
+          {features.map((f, i) => (
             <Card
               key={i}
               className="border-0 shadow-sm hover:shadow-xl transition-all duration-300 group overflow-hidden"
