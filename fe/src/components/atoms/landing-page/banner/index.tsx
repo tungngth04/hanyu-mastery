@@ -27,7 +27,7 @@ const Banner = () => {
             <Button
               size="lg"
               className="h-14 px-8 text-lg font-bold shadow-xl shadow-primary/25 group  inline-flex items-center justify-center gap-2 whitespace-nowrap"
-              onClick={() => router.push("/home")}
+              onClick={() => router.push("/app")}
               icon={<ArrowRight size={18} />}
             >
               Bắt đầu học ngay

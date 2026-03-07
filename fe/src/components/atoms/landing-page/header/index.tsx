@@ -31,7 +31,7 @@ const Header = () => {
         </a>
       </div>
       <div className="flex items-center gap-4">
-        <Link href="/home">
+        <Link href="/auth">
           <button className="font-semibold cursor-pointer">Đăng nhập</button>
         </Link>
         <Button onClick={() => router.push("/app")}>Bắt đầu học ngay</Button>

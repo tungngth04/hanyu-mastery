@@ -79,7 +79,7 @@ function Home() {
         <Button className="bg-white text-primary! hover:bg-slate-200 font-bold px-8 h-12 rounded-2xl!">
           Tiếp tục học
         </Button>
-        <Button className="bg-rose-600 ml-2 hover:bg-primary-500 hover:text-gray-900 font-bold px-8 h-12 rounded-2xl! border-slate-50 border whitespace-nowrap">
+        <Button className="bg-rose-600 ml-2 hover:bg-primary-500 font-bold px-8 h-12 rounded-2xl! border-slate-50 border whitespace-nowrap">
           Làm bài test năng lực
         </Button>
         <span className="absolute right-0 top-0 opacity-10 pointer-events-none font-chinese text-[200px] leading-none font-black whitespace-nowrap">
