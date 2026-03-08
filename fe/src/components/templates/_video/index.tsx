@@ -145,9 +145,12 @@ const VideoPage = () => {
 
       <div className="space-y-8">
         <h3 className="text-xl font-bold">Đề xuất cho bạn</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
           {videos.map((item, index) => (
-            <div key={index} className="w-full cursor-pointer group">
+            <div
+              key={index}
+              className="w-full cursor-pointer group hover:bg-slate-300 p-4 rounded-2xl"
+            >
               <div className="relative aspect-video rounded-xl overflow-hidden mb-3">
                 <Image
                   src={item.thumbnail}

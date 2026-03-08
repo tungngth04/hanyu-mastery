@@ -44,7 +44,7 @@ const ProfilePage = () => {
     },
   ];
   return (
-    <div className="py-4 px-15">
+    <div className="py-4 px-40">
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         <div className="space-y-6 w-full lg:w-1/3 ">
           <Card className="border-0 shadow-lg!">

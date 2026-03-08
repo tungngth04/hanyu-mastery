@@ -1,6 +1,9 @@
+"use client";
 import { Mail, MapPin, MessageSquare, Phone, Send } from "lucide-react";
 import { Card, CardContent } from "../../atoms/card";
 import Button from "../../atoms/button";
+import { Field, Form, Formik } from "formik";
+import { loginValidate } from "@/src/types/validates";
 
 const SupportPage = () => {
   const connect = [
@@ -61,6 +64,120 @@ const SupportPage = () => {
           <Card className="border shadow-sm">
             <CardContent className="flex gap-4 text-left flex-col">
               <h2 className="font-black text-xl">Gửi yêu cầu hỗ trợ</h2>
+
+              <div className="mt-6">
+                <Formik
+                  initialValues={{
+                    name: "",
+                    email: "",
+                    suport: "",
+                    info: "",
+                  }}
+                  validationSchema={loginValidate}
+                  onSubmit={() => {}}
+                >
+                  {({ errors, touched }) => (
+                    <Form className="space-y-5">
+                      <div className="flex gap-6">
+                        <div className="space-y-2 flex-1">
+                          <label
+                            htmlFor="name"
+                            className="text-sm cursor-pointer"
+                          >
+                            Họ và tên
+                          </label>
+                          <div>
+                            <Field
+                              id="name"
+                              type="text"
+                              name="name"
+                              placeholder="Nguyễn Văn A"
+                              className="pl-2 h-12 rounded-2xl placeholder:text-sm text-slate-800 focus:outline-none focus:border-primary focus:ring-primary/90 transition w-full border border-slate-200 shadow-md"
+                            />
+                          </div>
+                          <p>
+                            {errors.email && touched.email && (
+                              <>{errors.email}</>
+                            )}
+                          </p>
+                        </div>
+
+                        <div className="space-y-2 flex-1">
+                          <label
+                            htmlFor="email"
+                            className="text-sm cursor-pointer"
+                          >
+                            Email
+                          </label>
+                          <div>
+                            <Field
+                              id="email"
+                              type="text"
+                              name="email"
+                              placeholder="email@example.com"
+                              className="pl-2 h-12 rounded-2xl placeholder:text-sm text-slate-800 focus:outline-none focus:border-primary focus:ring-primary/90 transition w-full border border-slate-200 shadow-md"
+                            />
+                          </div>
+                          <p>
+                            {errors.email && touched.email && (
+                              <>{errors.email}</>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <label
+                            htmlFor="suport"
+                            className="text-sm cursor-pointer"
+                          >
+                            Vấn đề cần hỗ trợ
+                          </label>
+                        </div>
+                        <div>
+                          <Field
+                            id="suport"
+                            type="text"
+                            name="suport"
+                            placeholder="Ví dụ: Lỗi thanh toán gói Premium"
+                            className="pl-2 pr-10 h-12 rounded-2xl placeholder:text-sm text-slate-800 focus:outline-none focus:border-primary focus:ring-primary/90 transition w-full border border-slate-200 shadow-md"
+                          />
+                        </div>
+                        <p>
+                          {errors.suport && touched.suport && (
+                            <>{errors.suport}</>
+                          )}
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <label
+                            htmlFor="info"
+                            className="text-sm cursor-pointer"
+                          >
+                            Nội dung chi tiết
+                          </label>
+                        </div>
+                        <div>
+                          <Field
+                            id="info"
+                            as="textarea"
+                            name="info"
+                            placeholder="Mô tả kỹ vấn đề bạn gặp phải..."
+                            className="p-3 h-32 rounded-2xl placeholder:text-sm text-slate-800 focus:outline-none focus:border-primary focus:ring-primary/90 transition w-full border border-slate-200 shadow-md"
+                          />
+                        </div>
+                        <p>
+                          {errors.info && touched.info && <>{errors.info}</>}
+                        </p>
+                      </div>
+                    </Form>
+                  )}
+                </Formik>
+              </div>
+
               <Button
                 icon={<Send size={20} />}
                 className="inline-flex items-center justify-center gap-2 rounded-3xl! py-3!"
