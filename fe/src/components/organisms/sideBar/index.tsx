@@ -57,7 +57,7 @@ const SideBar = () => {
   };
 
   return (
-    <div className="fixed top-0 left-0 z-60 w-64 bg-white border-r border-slate-200 hidden md:block">
+    <div className="fixed top-0 left-0 z-60 w-64 bg-white border-r border-slate-200 hidden lg:block">
       <div className="flex items-center gap-2 font-bold text-xl text-primary">
         <Image
           src={"/images/logo.png"}

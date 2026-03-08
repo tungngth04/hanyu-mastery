@@ -5,7 +5,7 @@ const MainLayout = ({ main }: { main: React.ReactNode }) => {
   return (
     <>
       <div>
-        <main className="flex-1 md:ml-64">
+        <main className="flex-1 lg:ml-64">
           <Header />
           <div className="p-6">{main}</div>
         </main>

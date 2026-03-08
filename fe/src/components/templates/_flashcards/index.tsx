@@ -103,7 +103,7 @@ function FlashcardsPage() {
   return (
     <>
       {!completed ? (
-        <div className="space-y-8">
+        <div className="space-y-8 py-10 px-20">
           <div className="flex justify-between items-center">
             <div>
               <h1 className="font-black text-2xl">Ôn tập HSK 4 - Cấp tốc</h1>
