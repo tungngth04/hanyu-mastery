@@ -36,6 +36,7 @@ const LoginPage = () => {
           <div className="mt-6">
             <Formik
               initialValues={{
+                name: "",
                 email: "",
                 password: "",
               }}
@@ -49,7 +50,7 @@ const LoginPage = () => {
                       <label htmlFor="name" className="text-sm cursor-pointer">
                         Họ và tên
                       </label>
-                      <div className="relative mt-2 shadow-xl">
+                      <div className="relative mt-2">
                         <User
                           className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"
                           size={16}
@@ -59,12 +60,10 @@ const LoginPage = () => {
                           type="text"
                           name="name"
                           placeholder="Nguyễn Văn A"
-                          className="pl-10 h-12 rounded-3xl placeholder:text-sm text-slate-800 focus:outline-none focus:border-primary focus:ring-primary/90 transition w-full border border-slate-400"
+                          className="pl-10 h-12 rounded-3xl shadow-md placeholder:text-sm text-slate-800 focus:outline-none focus:border-primary focus:ring-primary/90 transition w-full border border-slate-400"
                         />
                       </div>
-                      <p>
-                        {errors.email && touched.email && <>{errors.email}</>}
-                      </p>
+                      <p>{errors.name && touched.name && <>{errors.name}</>}</p>
                     </div>
                   )}
 
@@ -72,7 +71,7 @@ const LoginPage = () => {
                     <label htmlFor="email" className="text-sm cursor-pointer">
                       Email
                     </label>
-                    <div className="relative mt-2 shadow-xl">
+                    <div className="relative mt-2">
                       <Mail
                         className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"
                         size={16}
@@ -82,7 +81,7 @@ const LoginPage = () => {
                         type="text"
                         name="email"
                         placeholder="email@example.com"
-                        className="pl-10 h-12 rounded-3xl placeholder:text-sm text-slate-800 focus:outline-none focus:border-primary focus:ring-primary/90 transition w-full border border-slate-400"
+                        className="pl-10 h-12 rounded-3xl shadow-md placeholder:text-sm text-slate-800 focus:outline-none focus:border-primary focus:ring-primary/90 transition w-full border border-slate-400"
                       />
                     </div>
                     <p>
@@ -104,7 +103,7 @@ const LoginPage = () => {
                         </button>
                       )}
                     </div>
-                    <div className="relative mt-2 shadow-xl">
+                    <div className="relative mt-2">
                       <Lock
                         className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 "
                         size={16}
@@ -113,7 +112,7 @@ const LoginPage = () => {
                         id="password"
                         type="password"
                         name="password"
-                        className="pl-10 pr-10 h-12 rounded-3xl placeholder:text-sm text-slate-800 focus:outline-none focus:border-primary focus:ring-primary/90 transition w-full border border-slate-400 "
+                        className="pl-10 pr-10 h-12 rounded-3xl shadow-md placeholder:text-sm text-slate-800 focus:outline-none focus:border-primary focus:ring-primary/90 transition w-full border border-slate-400 "
                       />
                       <button
                         type="button"

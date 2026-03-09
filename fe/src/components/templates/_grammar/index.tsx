@@ -142,7 +142,7 @@ const GrammarPage = () => {
         </Card>
       </div>
 
-      <div className="w-full lg:w-100 shrink-0 space-y-6">
+      <div className="w-full xl:w-100 shrink-0 space-y-6">
         <Card>
           <CardContent className="bg-slate-900 text-white p-6 rounded-2xl shadow-lg">
             <h3 className="font-bold text-lg mb-2">Tiến độ của bạn</h3>

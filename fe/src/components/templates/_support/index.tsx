@@ -37,7 +37,7 @@ const SupportPage = () => {
     },
   ];
   return (
-    <div className="text-center space-y-8 py-10 px-4 sm:px-6 md:px-12 lg:px-24 xl:px-20 max-w-7xl mx-auto">
+    <div className="text-center space-y-8 p-10 max-w-7xl mx-auto">
       <h1 className="font-black text-4xl">Trung tâm Hỗ trợ</h1>
       <p className="text-xl text-slate-500">
         Chúng tôi luôn sẵn sàng lắng nghe và giải đáp mọi vấn đề của bạn.
@@ -51,10 +51,10 @@ const SupportPage = () => {
                   <item.icon size={16} />
                 </div>
                 <div className="text-left">
-                  <p className="text-sm text-slate-600 font-blod">
+                  <p className="text-sm text-slate-600 font-bold">
                     {item.label}
                   </p>
-                  <p className="text-sm font-black">{item.info}</p>
+                  <p className="text-sm font-black break-all">{item.info}</p>
                 </div>
               </CardContent>
             </Card>

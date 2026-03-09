@@ -23,7 +23,7 @@ const AboutPage = () => {
     },
   ];
   return (
-    <div className="space-y-12 py-10 px-2 max-w-6xl mx-auto">
+    <div className="space-y-12 p-10 max-w-6xl mx-auto">
       <div className="text-center space-y-4">
         <h1 className="font-black text-3xl md:text-4xl">Về Hanyu Mastery</h1>
         <p className="text-base md:text-xl text-slate-500 max-w-3xl mx-auto">
