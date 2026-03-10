@@ -2,208 +2,256 @@
 import { useState } from "react";
 import { Card, CardContent } from "../../atoms/card";
 import Button from "../../atoms/button";
-import { Eye, RotateCcw, ThumbsDown, ThumbsUp } from "lucide-react";
+import {
+  BookOpen,
+  CircleCheck,
+  Clock,
+  Play,
+  Search,
+  TrendingUp,
+  Zap,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
 function FlashcardsPage() {
-  const [dataIndex, setDataIndex] = useState(0);
-  const [showBack, setShowBack] = useState(false);
-  const [completed, setCompleted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeLevel, setActiveLevel] = useState("Tất cả");
+  const router = useRouter();
 
-  const data = [
+  const decks = [
     {
       id: 1,
-      front: "环境",
-      pinyin: "huánjìng",
-      back: "Môi trường",
-      example: "保护环境 (Bǎohù huánjìng) - Bảo vệ môi trường",
+      title: "Ôn tập HSK 4 - Cấp tốc",
+      topic: "Công việc & Xã hội",
+      level: "HSK 4",
+      cards: 25,
+      completed: 18,
+      lastStudied: "Hôm nay",
+      color: "from-blue-500 to-cyan-500",
+      icon: "💼",
     },
     {
       id: 2,
-      front: "文化",
-      pinyin: "wénhuà",
-      back: "Văn hóa",
-      example: "中国文化 (Zhōngguó wénhuà) - Văn hóa Trung Quốc",
+      title: "Từ vựng Du lịch - Tây Tạng",
+      topic: "Du lịch & Văn hóa",
+      level: "HSK 3",
+      cards: 30,
+      completed: 12,
+      lastStudied: "2 ngày trước",
+      color: "from-orange-500 to-red-500",
+      icon: "✈️",
     },
     {
       id: 3,
-      front: "教育",
-      pinyin: "jiàoyù",
-      back: "Giáo dục",
-      example: "教育改革 (Jiàoyù gǎigé) - Cải cách giáo dục",
+      title: "Giao tiếp Nhà hàng",
+      topic: "Ăn uống & Giao tiếp",
+      level: "HSK 2",
+      cards: 20,
+      completed: 20,
+      lastStudied: "1 tuần trước",
+      color: "from-emerald-500 to-green-500",
+      icon: "🍜",
     },
     {
       id: 4,
-      front: "经济",
-      pinyin: "jīngjì",
-      back: "Kinh tế",
-      example: "经济发展 (Jīngjì fāzhǎn) - Phát triển kinh tế",
+      title: "Từ vựng Học tập",
+      topic: "Giáo dục",
+      level: "HSK 3",
+      cards: 28,
+      completed: 5,
+      lastStudied: "Chưa học",
+      color: "from-purple-500 to-pink-500",
+      icon: "📚",
     },
     {
       id: 5,
-      front: "科技",
-      pinyin: "kējì",
-      back: "Công nghệ",
-      example: "科技创新 (Kējì chuàngxīn) - Đổi mới công nghệ",
+      title: "Cụm từ Thương mại",
+      topic: "Kinh tế & Thương mại",
+      level: "HSK 5",
+      cards: 35,
+      completed: 8,
+      lastStudied: "3 ngày trước",
+      color: "from-indigo-500 to-blue-500",
+      icon: "💰",
     },
     {
       id: 6,
-      front: "健康",
-      pinyin: "jiànkāng",
-      back: "Sức khỏe",
-      example: "保持健康 (Bǎochí jiànkāng) - Giữ gìn sức khỏe",
-    },
-    {
-      id: 7,
-      front: "旅游",
-      pinyin: "lǚyóu",
-      back: "Du lịch",
-      example: "旅游景点 (Lǚyóu jǐngdiǎn) - Điểm du lịch",
-    },
-    {
-      id: 8,
-      front: "艺术",
-      pinyin: "yìshù",
-      back: "Nghệ thuật",
-      example: "艺术展览 (Yìshù zhǎnlǎn) - Triển lãm nghệ thuật",
-    },
-    {
-      id: 9,
-      front: "体育",
-      pinyin: "tǐyù",
-      back: "Thể thao",
-      example: "体育比赛 (Tǐyù bǐsài) - Trận đấu thể thao",
-    },
-    {
-      id: 10,
-      front: "社会",
-      pinyin: "shèhuì",
-      back: "Xã hội",
-      example: "社会问题 (Shèhuì wèntí) - Vấn đề xã hội",
+      title: "Thành ngữ Cổ điển",
+      topic: "Văn hóa & Thành ngữ",
+      level: "HSK 6",
+      cards: 40,
+      completed: 0,
+      lastStudied: "Chưa học",
+      color: "from-amber-500 to-orange-500",
+      icon: "🎋",
     },
   ];
 
-  const progressPercent = ((dataIndex + 1) / data.length) * 100;
-  const dataCard = data[dataIndex];
+  const levels = [
+    "Tất cả",
+    "HSK 1",
+    "HSK 2",
+    "HSK 3",
+    "HSK 4",
+    "HSK 5",
+    "HSK 6",
+  ];
 
-  const handleNext = () => {
-    if (dataIndex + 1 < data.length) {
-      setDataIndex(dataIndex + 1);
-      setShowBack(false);
-    } else {
-      setCompleted(true);
-    }
-  };
+  const statis = [
+    {
+      label: "Tổng thẻ",
+      value: "178",
+      icon: BookOpen,
+      color: "text-blue-500",
+      bg: "bg-blue-50!",
+      bgicon: "bg-blue-100",
+    },
+    {
+      label: "Đã thuộc",
+      value: "63",
+      icon: CircleCheck,
+      color: "text-green-500",
+      bg: "bg-green-50!",
+      bgicon: "bg-green-100",
+    },
+    {
+      label: "Tiến độ",
+      value: "35%",
+      icon: TrendingUp,
+      color: "text-purple-500",
+      bg: "bg-purple-50!",
+      bgicon: "bg-purple-100",
+    },
+    {
+      label: "Chuỗi học",
+      value: "5 ngày liên tục",
+      icon: Zap,
+      color: "text-yellow-500",
+      bg: "bg-yellow-50!",
+      bgicon: "bg-yellow-100",
+    },
+  ];
 
-  const handleRestart = () => {
-    setDataIndex(0);
-    setShowBack(false);
-    setCompleted(false);
-  };
+  const filteredDecks = decks.filter((deck) => {
+    const matchesSearch =
+      deck.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      deck.topic.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesLevel = activeLevel === "Tất cả" || deck.level === activeLevel;
+    return matchesSearch && matchesLevel;
+  });
 
   return (
     <>
-      {!completed ? (
-        <div className="space-y-8 py-10 px-20">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="font-black text-2xl">Ôn tập HSK 4 - Cấp tốc</h1>
-              <p className="text-slate-500 ">Chủ đề: Công việc và xã hội</p>
-            </div>
-            <div>
-              <span className="font-bold text-xl text-primary">
-                {dataIndex + 1}
-              </span>
-              <span className="text-slate-500">/{data.length}</span>
-            </div>
-          </div>
-
-          <div className="h-2 w-full bg-rose-200 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-red-500 rounded-full transition-all"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-
-          <div className="flex justify-center items-center perspective">
-            <div
-              className={`relative z-10 transition-transform duration-500 preserve-3d cursor-pointer w-[90%] sm:w-125 md:w-150 lg:w-175 h-100 ${showBack ? "-rotate-y-180" : ""}`}
-              onClick={() => setShowBack(!showBack)}
-            >
-              <Card className="absolute inset-0 backface-hidden border shadow-xl flex items-center justify-center h-100 w-full">
-                <CardContent className="flex items-center gap-4 flex-col">
-                  <h2 className="text-9xl md:text-9xl font-bold">
-                    {dataCard.front}
-                  </h2>
-
-                  <div className="flex items-center justify-center gap-2">
-                    <Eye className="text-gray-400" />
-                    <p className="text-gray-400">Chạm để xem nghĩa</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="absolute inset-0 rotate-y-180 backface-hidden border shadow-xl flex items-center justify-center h-100 w-full">
-                <CardContent className="flex flex-col items-center gap-3 p-0!">
-                  <p className="text-red-500 text-4xl">{dataCard.pinyin}</p>
-                  <p className="text-5xl font-black">{dataCard.back}</p>
-                  <div className="flex gap-4">
-                    <p className="bg-blue-200 py-1 px-3 rounded-2xl text-blue-700 font-bold text-sm w-20 text-center">
-                      Danh từ
-                    </p>
-                    <p className="bg-orange-100 py-1 px-3 rounded-2xl text-orange-400 font-bold text-sm w-20 text-center">
-                      HSK 4
-                    </p>
-                  </div>
-                  <Card className="w-full">
-                    <CardContent>
-                      <p className="text-slate-700">Ví dụ:</p>
-                      <p>{dataCard.example}</p>
-                    </CardContent>
-                  </Card>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          <div className="flex justify-center gap-6">
-            <Button
-              className="bg-white text-primary! p-0! w-38 h-18 flex flex-col items-center justify-center gap-2 hover:bg-rose-100"
-              onClick={handleNext}
-            >
-              <span>
-                <ThumbsDown />
-              </span>
-              <span>Chưa thuộc</span>
-            </Button>
-            <Button
-              className="bg-green-300!  p-0! w-38 h-18 flex flex-col items-center justify-center gap-2 shadow-green-500/20! hover:bg-green-400!"
-              onClick={handleNext}
-            >
-              <span>
-                <ThumbsUp />
-              </span>
-              <span>Đã thuộc</span>
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <div className=" flex flex-col items-center justify-center h-100 w-full gap-5 mt-10">
-          <div className="bg-green-100 rounded-full w-24 h-24 flex items-center justify-center text-green-500">
-            <ThumbsUp size={32} />
-          </div>
-          <h1 className="text-4xl font-bold">Hoàn thành xuất sắc!</h1>
-          <p className="text-gray-500">
-            Bạn đã ôn tập xong bộ flashcard hôm nay.
+      <div className="space-y-8 py-10 px-20">
+        <div>
+          <h1 className="font-black text-2xl">Flashcards</h1>
+          <p className="text-slate-500 ">
+            Luyện tập từ vựng với thẻ ghi nhớ thông minh. Chọn bộ để bắt đầu ôn
+            tập.
           </p>
-
-          <button
-            onClick={handleRestart}
-            className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-full flex items-center justify-center gap-2"
-          >
-            <RotateCcw size={20} /> Học lại bộ này
-          </button>
         </div>
-      )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 xl:grid-cols-4">
+          {statis.map((item, index) => (
+            <Card key={index} className={`border shadow-sm ${item.bg}`}>
+              <CardContent className="igap-4 text-center flex justify-between items-start">
+                <div className="text-left">
+                  <p className="text-base text-slate-500 ">{item.label}</p>
+                  <p className="text-xl font-black ">{item.value}</p>
+                </div>
+                <div
+                  className={`${item.bgicon} ${item.color} p-3 rounded-full w-10 h-10 shrink-0 flex items-center justify-center`}
+                >
+                  <item.icon />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Tìm kiếm bộ flashcard..."
+            className="pl-9 w-full pr-4 py-3 bg-white rounded-2xl! border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+
+        <div className="flex overflow-x-auto pb-2 gap-2 scrollbar-hide">
+          {levels.map((item, index) => (
+            <Button
+              key={index}
+              className={`rounded-full! whitespace-nowrap shrink-0 px-4 py-2 text-sm ${activeLevel === item ? "bg-red-500 text-white shadow-md shadow-red-200 " : "bg-white text-gray-700! hover:bg-primary/70! border border-slate-200 shadow-none! hover:text-white!"}`}
+              onClick={() => setActiveLevel(item)}
+            >
+              {item}
+            </Button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
+          {filteredDecks.map((item, index) => (
+            <Card
+              key={index}
+              className="group overflow-hidden border border-slate-200 rounded-2xl! hover:shadow-xl! shadow-lg! transition-all cursor-pointer"
+            >
+              <CardContent className="p-0 relative">
+                <div
+                  className={`absolute top-0 left-0 w-full px-4 py-6 h-32 bg-linear-to-br ${item.color} border-b border-slate-200 text-white flex flex-col gap-4`}
+                >
+                  <div className="text-4xl">{item.icon}</div>
+                  <h3 className="font-bold text-lg group-hover:translate-x-1 transition-transform">
+                    {item.title}
+                  </h3>
+                </div>
+                <div className="pt-30 space-y-4">
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm border border-black px-2 py-0.5 rounded-full font-medium">
+                      {item.level}
+                    </span>
+                    <span className="text-sm text-slate-500 font-medium">
+                      {item.topic}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 justify-between">
+                    <p className="text-sm text-slate-700 font-medium">
+                      Tiến độ
+                    </p>
+                    <p className="text-sm text-primary font-bold">
+                      {item.completed}/{item.cards}
+                    </p>
+                  </div>
+
+                  <div className="bg-rose-200 h-3 w-full rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-red-500 rounded-l-2xl transition-all"
+                      style={{
+                        width: `${(item.completed / item.cards) * 100}%`,
+                      }}
+                    ></div>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t pt-2 border-slate-100">
+                    <p className="text-xs text-slate-500">
+                      <Clock size={12} className="inline mr-1" />
+                      Học lần cuối: {item.lastStudied}
+                    </p>
+                    <Button
+                      size="sm"
+                      className="gap-1 rounded-lg bg-primary hover:bg-primary/90 whitespace-nowrap inline-flex items-center"
+                      onClick={() => router.push(`/flashcards/${item.id}`)}
+                    >
+                      <Play size={14} /> Học
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
     </>
   );
 }

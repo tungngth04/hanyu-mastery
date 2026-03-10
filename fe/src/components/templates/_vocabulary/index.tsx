@@ -107,7 +107,7 @@ const VocabularyPage = () => {
           <input
             type="text"
             placeholder="Tìm kiếm bằng Hanzi, Pinyin hoặc Tiếng Việt..."
-            className="pl-9 w-full pr-4 py-2 bg-white rounded-xl! border border-slate-200 shadow-sm"
+            className="pl-9 w-full pr-4 py-2 bg-white rounded-xl! border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
         <button className="border px-4 py-2 rounded-xl text-sm cursor-pointer flex gap-2 items-center">
