@@ -46,16 +46,16 @@ const HSKPage = () => {
         <span className="bg-amber-500 hover:bg-amber-600 text-white py-0.5 px-4 rounded-full">
           Luyện thi chứng chỉ
         </span>
-        <h1 className="text-4xl font-black mb-4 mt-4">
-          Trung tâm Luyện thi HSK
-        </h1>
+        <h1 className="text-4xl font-black mb-4 mt-4">Luyện thi HSK</h1>
         <p className="text-white/80 text-lg mb-8 max-w-3xl">
           Đánh giá năng lực chuẩn xác với các đề thi mô phỏng thực tế. Cấu trúc
           bài thi cập nhật mới nhất theo chuẩn Hanban.
         </p>
-        <Button className="bg-white text-gray-800! hover:bg-slate-200 font-bold! px-8 h-12 rounded-2xl! text-lg">
-          Làm bài test năng lực
-        </Button>
+        <a href="#level">
+          <Button className="bg-white text-gray-800! hover:bg-slate-200 font-bold! px-8 h-12 rounded-2xl! text-lg">
+            Làm bài test năng lực
+          </Button>
+        </a>
         <span className="absolute right-20 top-1/2 -translate-y-1/2  opacity-10 pointer-events-none hidden md:block">
           <Award size={250} />
         </span>
@@ -77,7 +77,7 @@ const HSKPage = () => {
         ))}
       </div>
 
-      <div className="flex justify-between">
+      <div id="level" className="flex justify-between">
         <h1 className="text-2xl font-bold">Chọn cấp độ</h1>
         <div className="border border-slate-200 rounded-full py-1 px-2">
           {levels.map((item, index) => (

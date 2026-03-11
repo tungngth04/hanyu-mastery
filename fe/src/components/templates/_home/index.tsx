@@ -1,8 +1,12 @@
+"use client";
 import { BookA, CirclePlay, Clock, Flame, Trophy } from "lucide-react";
 import Button from "../../atoms/button";
 import "./style.scss";
 import { Card, CardContent } from "../../atoms/card";
+import { useRouter } from "next/navigation";
 function Home() {
+  const router = useRouter();
+
   const statis = [
     {
       label: "Chuỗi học tập",
@@ -40,24 +44,28 @@ function Home() {
       value: "15 chủ đề giao tiếp cơ bản",
       percent: "65",
       bg: "bg-blue-500",
+      link: "/vocabulary",
     },
     {
       label: "Luyện phát âm chuẩn",
       value: "Thanh điệu và ngữ điệu",
       percent: "40",
       bg: "bg-green-500",
+      link: "/pronunciation",
     },
     {
       label: "Ngữ pháp HSK 3",
       value: "Các điểm ngữ pháp quan trọng",
       percent: "15",
       bg: "bg-purple-500",
+      link: "/grammar",
     },
     {
       label: "Flashcards ôn tập",
       value: "Ôn tập 50 từ vựng cũ",
       percent: "80",
       bg: "bg-orange-500",
+      link: "/flashcards",
     },
   ];
 
@@ -79,7 +87,10 @@ function Home() {
         <Button className="bg-white text-primary! hover:bg-slate-200 font-bold px-8 h-12 rounded-2xl!">
           Tiếp tục học
         </Button>
-        <Button className="bg-rose-600 ml-2 hover:bg-primary-500 font-bold px-8 h-12 rounded-2xl! border-slate-50 border whitespace-nowrap">
+        <Button
+          className="bg-rose-600 ml-2 hover:bg-primary-500 font-bold px-8 h-12 rounded-2xl! border-slate-50 border whitespace-nowrap"
+          onClick={() => router.push("/hsk")}
+        >
           Làm bài test năng lực
         </Button>
         <span className="absolute right-0 top-0 opacity-10 pointer-events-none font-chinese text-[200px] leading-none font-black whitespace-nowrap">
@@ -117,7 +128,10 @@ function Home() {
                 key={index}
                 className="border shadow-sm cursor-pointer hover:shadow-md transition-shadow k hover:text-primary"
               >
-                <CardContent className="flex items-center gap-4 w-full!">
+                <CardContent
+                  className="flex items-center gap-4 w-full!"
+                  onClick={() => router.push(item.link)}
+                >
                   <div className="w-full space-y-2">
                     <div className="flex justify-between gap-4">
                       <div className={`${item.bg} text-white p-3 rounded-2xl`}>

@@ -44,7 +44,7 @@ const SideBar = () => {
 
   const renderItem = (item: NavItem, index: number) => {
     const Icon = item.icon;
-    const isActive = pathname === item.href;
+    const isActive = pathname.startsWith(item.href);
     return (
       <Link key={index} href={item.href}>
         <div

@@ -190,11 +190,11 @@ function FlashcardsPage() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredDecks.map((item, index) => (
             <Card
               key={index}
-              className="group overflow-hidden border border-slate-200 rounded-2xl! hover:shadow-xl! shadow-lg! transition-all cursor-pointer"
+              className="group overflow-hidden border border-slate-200 rounded-2xl! hover:shadow-xl! shadow-lg! transition-all cursor-pointer  slide-left delay-100"
             >
               <CardContent className="p-0 relative">
                 <div

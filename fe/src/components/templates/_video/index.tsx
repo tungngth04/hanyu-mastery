@@ -3,9 +3,11 @@ import { Bookmark, CirclePlay, Clock, Eye, TrendingUp } from "lucide-react";
 import Button from "../../atoms/button";
 import { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const VideoPage = () => {
   const [activeCategory, setActiveCategory] = useState("Mới nhất");
+  const router = useRouter();
 
   const categories = [
     "Mới nhất",
@@ -89,7 +91,10 @@ const VideoPage = () => {
           </p>
         </div>
         <div className="lg:justify-self-end">
-          <button className="flex whitespace-nowrap items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition">
+          <button
+            className="flex whitespace-nowrap items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition cursor-pointer"
+            onClick={() => router.push("/saved-videos")}
+          >
             <Bookmark size={16} />
             Video đã lưu
           </button>
@@ -150,6 +155,7 @@ const VideoPage = () => {
             <div
               key={index}
               className="w-full cursor-pointer group hover:bg-slate-300 p-4 rounded-2xl"
+              onClick={() => router.push(`/video/${item.id}`)}
             >
               <div className="relative aspect-video rounded-xl overflow-hidden mb-3">
                 <Image

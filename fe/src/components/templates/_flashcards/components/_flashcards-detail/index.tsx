@@ -105,37 +105,39 @@ function FlashcardsDetail() {
   return (
     <>
       {!completed ? (
-        <div className="space-y-8 py-10 px-20">
-          <div className="flex justify-end">
-            <Button
-              size="sm"
-              className="gap-1 rounded-lg bg-primary hover:bg-primary/90 whitespace-nowrap inline-flex items-center"
-              onClick={() => router.back()}
-            >
-              Quay lại
-            </Button>
-          </div>
+        <div className="space-y-2 py-10 px-20">
           <div className="flex justify-between items-center">
             <div>
               <h1 className="font-black text-2xl">Ôn tập HSK 4 - Cấp tốc</h1>
               <p className="text-slate-500 ">Chủ đề: Công việc và xã hội</p>
             </div>
             <div>
+              <Button
+                size="sm"
+                className="gap-1 rounded-lg bg-primary hover:bg-primary/90 whitespace-nowrap inline-flex items-center"
+                onClick={() => router.back()}
+              >
+                Quay lại
+              </Button>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex justify-end">
               <span className="font-bold text-xl text-primary">
                 {dataIndex + 1}
               </span>
               <span className="text-slate-500">/{data.length}</span>
             </div>
+            <div className="h-2 w-full bg-rose-200 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-red-500 rounded-full transition-all"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
           </div>
 
-          <div className="h-2 w-full bg-rose-200 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-red-500 rounded-full transition-all"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-
-          <div className="flex justify-center items-center perspective">
+          <div className="flex justify-center items-center perspective mt-6">
             <div
               className={`relative z-10 transition-transform duration-500 preserve-3d cursor-pointer w-[90%] sm:w-125 md:w-150 lg:w-175 h-100 ${showBack ? "-rotate-y-180" : ""}`}
               onClick={() => setShowBack(!showBack)}
