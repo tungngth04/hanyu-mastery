@@ -4,6 +4,7 @@ const ApiError = require('../utils/ApiError');
 const mailer = require('../utils/mailer');
 
 const { status: httpStatus } = require('http-status');
+const { generateAccessToken, generateRefreshToken } = require('../utils/generateToken');
 
 const register = catchAsync(async (req, res) => {
   const existEmail = await User.findOne({ email: req.body.email });
@@ -34,6 +35,32 @@ const register = catchAsync(async (req, res) => {
   });
 });
 
+const login = catchAsync(async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email }).select('+password');
+
+  if (!user || !(await user.isMatchPassword(password))) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Tài khoàn hoặc mật khẩu không chính xác');
+  }
+
+  user.password = undefined;
+
+  const accessToken = generateAccessToken({ id: user._id });
+  const refreshToken = generateRefreshToken({ id: user._id });
+
+  res.status(httpStatus.OK).json({
+    message: 'Đăng nhập thành công',
+    code: httpStatus.OK,
+    data: {
+      user,
+      accessToken,
+      refreshToken,
+    },
+  });
+});
+
 module.exports = {
   register,
+  login,
 };
