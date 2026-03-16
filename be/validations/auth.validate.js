@@ -19,6 +19,22 @@ const register = {
   }),
 };
 
+const login = {
+  body: joi.object({
+    email: joi.string().email().required().messages({
+      'any.required': 'Vui lòng điền email',
+    }),
+    password: joi.string().required().custom(password),
+  }),
+};
+
+const refreshToken = {
+  body: joi.string().required().messages({
+    'any.required': 'Vui lòng điền refresh token',
+  }),
+};
 module.exports = {
   register,
+  login,
+  refreshToken,
 };

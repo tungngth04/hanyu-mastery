@@ -2,6 +2,7 @@ const User = require('../models/user.model');
 const catchAsync = require('../utils/catchAsync');
 const ApiError = require('../utils/ApiError');
 const mailer = require('../utils/mailer');
+const jwt = require('jsonwebtoken');
 
 const { status: httpStatus } = require('http-status');
 const { generateAccessToken, generateRefreshToken } = require('../utils/generateToken');
@@ -41,10 +42,10 @@ const login = catchAsync(async (req, res) => {
   const user = await User.findOne({ email }).select('+password');
 
   if (!user || !(await user.isMatchPassword(password))) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Tài khoàn hoặc mật khẩu không chính xác');
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Tài khoàn hoặc mật khẩu không chính xác');
   }
 
-  user.password = undefined;
+  // user.password = undefined;
 
   const accessToken = generateAccessToken({ id: user._id });
   const refreshToken = generateRefreshToken({ id: user._id });
@@ -53,9 +54,45 @@ const login = catchAsync(async (req, res) => {
     message: 'Đăng nhập thành công',
     code: httpStatus.OK,
     data: {
-      user,
+      // user,
       accessToken,
       refreshToken,
+    },
+  });
+});
+
+const refreshToken = catchAsync(async (req, res) => {
+  const { refreshToken } = req.body;
+
+  jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET, async (err, user) => {
+    if (err) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'Vui lòng đăng nhập hệ thống');
+    }
+
+    const currentUser = await User.findById(user.id);
+
+    if (!currentUser) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'Vui lòng đăng nhập hệ thống');
+    }
+
+    const accessToken = generateAccessToken({ id: currentUser._id });
+
+    res.status(httpStatus.OK).json({
+      code: httpStatus.OK,
+      message: 'Làm mới token thành công',
+      data: {
+        accessToken,
+      },
+    });
+  });
+});
+
+const getCurrentUser = catchAsync(async (req, res) => {
+  res.status(httpStatus.OK).json({
+    code: httpStatus.OK,
+    message: 'Lấy thông tin người dùng thành công',
+    data: {
+      user: req.user,
     },
   });
 });
@@ -63,4 +100,6 @@ const login = catchAsync(async (req, res) => {
 module.exports = {
   register,
   login,
+  refreshToken,
+  getCurrentUser,
 };

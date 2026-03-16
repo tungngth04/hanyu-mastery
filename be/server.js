@@ -21,6 +21,15 @@ app.use(express.static('public'));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(prefixPath, apiRoute);
 
+app.use((err, req, res, next) => {
+  const statusCode = err.status || 500;
+
+  res.status(statusCode).json({
+    code: statusCode,
+    message: err.message || 'Internal Server Error',
+  });
+});
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
