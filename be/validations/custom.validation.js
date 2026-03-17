@@ -8,4 +8,11 @@ const password = (value, helpers) => {
   return value;
 };
 
-module.exports = { password };
+const objectId = (value, helpers) => {
+  if (!value.match(/^[0-9a-fA-F]{24}$/)) {
+    return helpers.message('"{{#label}}" không đúng định dạng Id');
+  }
+  return value;
+};
+
+module.exports = { password, objectId };

@@ -8,12 +8,12 @@ mongoose.connect('mongodb+srv://tungnt:WRqDFlKtlbpIwY0P@ntung.cfv0v.mongodb.net/
 const userId = new mongoose.Types.ObjectId('69b7719d02ae9d855c75a01f');
 
 const decks = {
-  basic: '69b7d8d424251251bbfbdf94',
-  communication: '69b7d8d424251251bbfbdf95',
-  food: '69b7d8d424251251bbfbdf96',
-  family: '69b7d8d424251251bbfbdf97',
-  timeNumber: '69b7d8d424251251bbfbdf98',
-  location: '69b7d8d424251251bbfbdf99',
+  basic: '69b8feb0597272be6199e5e0',
+  communication: '69b8feb0597272be6199e5e1',
+  food: '69b8feb0597272be6199e5e2',
+  family: '69b8feb0597272be6199e5e3',
+  timeNumber: '69b8feb0597272be6199e5e4',
+  location: '69b8feb0597272be6199e5e5',
 };
 
 async function seedFlashcards() {

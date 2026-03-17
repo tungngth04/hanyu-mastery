@@ -7,9 +7,11 @@ const flashcardDeckSchema = new mongoose.Schema(
       required: true,
     },
 
-    description: String,
+    topic: String,
 
     level: Number,
+
+    lastStudied: Date,
 
     userId: {
       type: mongoose.Schema.Types.ObjectId,

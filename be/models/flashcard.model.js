@@ -17,6 +17,12 @@ const flashcardSchema = new mongoose.Schema(
       ref: 'Vocabulary',
     },
 
+    status: {
+      type: String,
+      enum: ['new', 'mastered'],
+      default: 'new',
+    },
+
     addedAt: {
       type: Date,
       default: Date.now,

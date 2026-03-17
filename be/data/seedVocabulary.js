@@ -32,7 +32,7 @@ async function seedData() {
       exampleMeaning: item['Dịch'],
       radical: item['radical'],
       topicId: item['topicId'],
-      level: 1,
+      level: 2,
       audio: audioPath,
     });
 
