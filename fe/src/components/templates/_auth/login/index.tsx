@@ -1,15 +1,75 @@
 "use client";
 import Button from "@/src/components/atoms/button";
+import CookieStorage from "@/src/helpers/cookies";
+import LocalStorage from "@/src/helpers/local-storage";
+import { useAppDispatch } from "@/src/hooks/useHookReducers";
+import useNotification from "@/src/hooks/useNotification";
+import { postLogin, updateUserInfor } from "@/src/services/auth";
 import { loginValidate } from "@/src/types/validates";
 import { Field, Form, Formik } from "formik";
-import { ArrowRight, Eye, Lock, Mail, User } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+type LoginValues = {
+  email: string;
+  password: string;
+};
+
+type RegisterValues = {
+  name: string;
+  email: string;
+  password: string;
+};
 const LoginPage = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState<boolean>(true);
   const router = useRouter();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  const dispatch = useAppDispatch();
+  const { notify } = useNotification();
+
+  const handleSubmit = async (values: LoginValues | RegisterValues) => {
+    try {
+      setLoading(true);
+      let result;
+
+      if (isLogin) {
+        result = await dispatch(
+          postLogin({
+            email: values.email,
+            password: values.password,
+          }),
+        ).unwrap();
+
+        LocalStorage.setLocalStorage("access-token", result.accessToken);
+        CookieStorage.setCookie("refresh-token", result.refreshToken);
+        if (result) {
+          notify("success", "Đăng nhập thành công");
+        }
+
+        router.push("/app");
+      } else {
+        return;
+      }
+
+      if (result?.user) {
+        await dispatch(updateUserInfor(result.user));
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      notify(
+        "error",
+        error?.message || "Không thể đăng nhập, vui lòng thử lại sau!",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       <div className="flex items-center justify-center p-8 bg-white">
@@ -40,8 +100,8 @@ const LoginPage = () => {
                 email: "",
                 password: "",
               }}
-              validationSchema={loginValidate}
-              onSubmit={() => {}}
+              validationSchema={loginValidate()}
+              onSubmit={(values) => handleSubmit(values)}
             >
               {({ errors, touched }) => (
                 <Form>
@@ -110,15 +170,20 @@ const LoginPage = () => {
                       />
                       <Field
                         id="password"
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         name="password"
                         className="pl-10 pr-10 h-12 rounded-3xl shadow-md placeholder:text-sm text-slate-800 focus:outline-none focus:border-primary focus:ring-primary/90 transition w-full border border-slate-400 "
                       />
                       <button
                         type="button"
+                        onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 cursor-pointer"
                       >
-                        <Eye size={18} />
+                        {showPassword ? (
+                          <Eye size={18} />
+                        ) : (
+                          <EyeOff size={18} />
+                        )}
                       </button>
                     </div>
                     <p>
@@ -127,17 +192,18 @@ const LoginPage = () => {
                       )}
                     </p>
                   </div>
+                  <Button
+                    type="submit"
+                    className="w-full text-base font-black shadow-xl shadow-primary/25 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl! mt-2"
+                    icon={<ArrowRight size={16} />}
+                  >
+                    {isLogin ? "Đăng nhập" : " Đăng ký tài khoản"}
+                  </Button>
                 </Form>
               )}
             </Formik>
           </div>
 
-          <Button
-            className="w-full text-base font-black shadow-xl shadow-primary/25 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl! mt-2"
-            icon={<ArrowRight size={16} />}
-          >
-            {isLogin ? "Đăng nhập" : " Đăng ký tài khoản"}
-          </Button>
           <div className="w-full flex justify-center mt-6">
             <p className="text-xs text-slate-500 font-black">
               HOẶC TIẾP TỤC VỚI

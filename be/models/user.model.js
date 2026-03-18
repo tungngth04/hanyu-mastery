@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema(
       default: 0,
     },
 
-    lastStudyDate: Date,
+    lastStudyDate: Date, 
     // nhắc học
     notification: {
       type: Boolean,

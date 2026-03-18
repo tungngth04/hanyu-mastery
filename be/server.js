@@ -9,9 +9,11 @@ const swaggerSpec = require('./config/swagger');
 
 database.connect();
 
+const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3002;
 
+app.use(cors());
 // parse json body
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

@@ -1,4 +1,7 @@
 "use client";
+import { useAppDispatch, useAppSelector } from "@/src/hooks/useHookReducers";
+import useNotification from "@/src/hooks/useNotification";
+import { clearAuth } from "@/src/services/auth";
 import { Divider } from "antd";
 import { BellDot, LogOut, Search, User } from "lucide-react";
 import Image from "next/image";
@@ -8,6 +11,17 @@ import { useState } from "react";
 const Header = () => {
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { notify } = useNotification();
+
+  const { userInfor } = useAppSelector((state) => state.auth);
+
+  const handleLogout = async () => {
+    await dispatch(clearAuth());
+    router.push("/");
+    notify("success", "Đăng xuất thành công");
+  };
+
   return (
     <header className="flex items-center px-6 h-16 bg-white/80 shadow-md sticky top-0 z-50 border-b border-slate-200 backdrop-blur-md">
       <div className="relative flex-1 min-w-0 mr-2 ">
@@ -43,7 +57,7 @@ const Header = () => {
           >
             <div className="absolute -top-2 right-6 w-4 h-4 bg-purple-300 rotate-45"></div>
             <div className="pt-4 pb-2 font-semibold text-center text-lg">
-              Loan Vu
+              {userInfor?.fullname}
             </div>
 
             <div className="px-6">
@@ -62,7 +76,10 @@ const Header = () => {
               <Divider style={{ margin: 0, borderColor: "white" }} />
             </div>
 
-            <button className="flex items-center gap-3 px-6 py-3 w-full hover:bg-purple-400 transition rounded-b-2xl cursor-pointer">
+            <button
+              className="flex items-center gap-3 px-6 py-3 w-full hover:bg-purple-400 transition rounded-b-2xl cursor-pointer"
+              onClick={() => handleLogout()}
+            >
               <LogOut size={18} />
               Đăng xuất
             </button>
