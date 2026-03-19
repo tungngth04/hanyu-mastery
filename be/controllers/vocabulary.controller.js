@@ -4,38 +4,14 @@ const Vocabulary = require('../models/vocabulary.model');
 const ApiError = require('../utils/ApiError');
 
 const getAllvocabulary = catchAsync(async (req, res) => {
-  const { pageSize = 10, page = 1 } = req.query;
+  const { pageSize = 10, page = 1, topicId } = req.query;
+
   const skip = (+page - 1) * +pageSize;
 
-  const vocabularys = await Vocabulary.find()
+  const filter = topicId ? { topicId } : {};
+
+  const vocabularies = await Vocabulary.find(filter)
     .sort({ level: 1 })
-    .skip(skip)
-    .limit(+pageSize)
-    .select('-__v -createdAt -updatedAt -topicId');
-
-  const totalResults = await Vocabulary.countDocuments();
-
-  res.status(httpStatus.OK).json({
-    code: httpStatus.OK,
-    message: 'Lấy danh sách từ vựng thành công',
-    data: {
-      vocabularys,
-      limit: +pageSize,
-      currentPage: +page,
-      totalPage: Math.ceil(totalResults / +pageSize),
-      totalResults,
-    },
-  });
-});
-
-const getVocabularyByTopicId = catchAsync(async (req, res) => {
-  const { pageSize = 10, page = 1 } = req.query;
-  const skip = (+page - 1) * +pageSize;
-
-  const { topicId } = req.params;
-
-  const vocabularies = await Vocabulary.find({ topicId })
-    .sort({ createdAt: -1 })
     .skip(skip)
     .limit(+pageSize)
     .select('-__v -createdAt -updatedAt');
@@ -44,11 +20,11 @@ const getVocabularyByTopicId = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy từ vựng!');
   }
 
-  const totalResults = await Vocabulary.countDocuments({ topicId });
+  const totalResults = await Vocabulary.countDocuments(filter);
 
   res.status(httpStatus.OK).json({
     code: httpStatus.OK,
-    message: 'Lấy danh sách từ vựng theo topic thành công',
+    message: 'Lấy danh sách từ vựng thành công',
     data: {
       vocabularies,
       limit: +pageSize,
@@ -59,4 +35,4 @@ const getVocabularyByTopicId = catchAsync(async (req, res) => {
   });
 });
 
-module.exports = { getAllvocabulary, getVocabularyByTopicId };
+module.exports = { getAllvocabulary };
