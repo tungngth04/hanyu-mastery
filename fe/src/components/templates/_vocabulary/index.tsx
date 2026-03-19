@@ -1,96 +1,87 @@
 "use client";
 import { Filter, Plus, Search, Volume2 } from "lucide-react";
 import Button from "../../atoms/button";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "../../atoms/card";
+import { IVocabulary, IVocabularyTopic } from "@/src/types/interface";
+import { useAppDispatch } from "@/src/hooks/useHookReducers";
+import { getTopic, getVocabulary } from "@/src/services/vocabulary";
+import useNotification from "@/src/hooks/useNotification";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Pagination } from "antd";
+import ScrollContainer from "react-indiana-drag-scroll";
 
 const VocabularyPage = () => {
   const [activeTopic, setActiveTopic] = useState("Tất cả");
-  const topics = [
-    "Tất cả",
-    "Chào hỏi",
-    "Gia đình",
-    "Công việc",
-    "Sở thích",
-    "Du lịch",
-    "Mua sắm",
-    "Ăn uống",
-  ];
+  const dispatch = useAppDispatch();
+  const { notify } = useNotification();
+  const router = useRouter();
 
-  const mockVocabulary = [
-    {
-      id: 1,
-      hanzi: "你好",
-      pinyin: "nǐ hǎo",
-      meaning: "Xin chào",
-      topic: "Chào hỏi",
-      level: "HSK 1",
-    },
-    {
-      id: 2,
-      hanzi: "谢谢",
-      pinyin: "xièxie",
-      meaning: "Cảm ơn",
-      topic: "Chào hỏi",
-      level: "HSK 1",
-    },
-    {
-      id: 3,
-      hanzi: "爸爸",
-      pinyin: "bàba",
-      meaning: "Bố",
-      topic: "Gia đình",
-      level: "HSK 1",
-    },
-    {
-      id: 4,
-      hanzi: "妈妈",
-      pinyin: "māma",
-      meaning: "Mẹ",
-      topic: "Gia đình",
-      level: "HSK 1",
-    },
-    {
-      id: 5,
-      hanzi: "工作",
-      pinyin: "gōngzuò",
-      meaning: "Công việc",
-      topic: "Công việc",
-      level: "HSK 2",
-    },
-    {
-      id: 6,
-      hanzi: "旅游",
-      pinyin: "lǚyóu",
-      meaning: "Du lịch",
-      topic: "Du lịch",
-      level: "HSK 2",
-    },
-    {
-      id: 7,
-      hanzi: "苹果",
-      pinyin: "píngguǒ",
-      meaning: "Quả táo",
-      topic: "Ăn uống",
-      level: "HSK 1",
-    },
-    {
-      id: 8,
-      hanzi: "电脑",
-      pinyin: "diànnǎo",
-      meaning: "Máy tính",
-      topic: "Công việc",
-      level: "HSK 2",
-    },
-    {
-      id: 9,
-      hanzi: "朋友",
-      pinyin: "péngyǒu",
-      meaning: "Bạn bè",
-      topic: "Chào hỏi",
-      level: "HSK 1",
-    },
-  ];
+  const searchParams = useSearchParams();
+  const topicId = searchParams.get("topicId");
+  const page = Number(searchParams.get("page") || 1);
+  const pageSize = Number(searchParams.get("pageSize") || 10);
+
+  const [topics, setTopic] = useState<IVocabularyTopic[]>([]);
+  const [vocabulary, setVocabulary] = useState<IVocabulary[]>([]);
+  const [total, setTotal] = useState(0);
+  const hasFetched = useRef(false);
+
+  useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
+    const loadListTopic = async () => {
+      try {
+        const res = await dispatch(getTopic()).unwrap();
+        setTopic(res || []);
+        notify("success", "Lấy dữ liệu thành công");
+      } catch (error) {
+        notify("error", "Lỗi không thể lấy danh sách chủ đề");
+      }
+    };
+
+    loadListTopic();
+  }, []);
+
+  useEffect(() => {
+    const loadVocabulary = async () => {
+      try {
+        const res = await dispatch(
+          getVocabulary({
+            topicId: topicId || undefined,
+            page,
+            pageSize,
+          }),
+        ).unwrap();
+        setVocabulary(res.vocabularies);
+        setTotal(res.totalResults);
+      } catch (err) {
+        notify("error", "Lỗi load từ vựng");
+      }
+    };
+
+    loadVocabulary();
+  }, [topicId, page, pageSize]);
+
+  const handleChangePage = (page: number, pageSize: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    params.set("page", String(page));
+    params.set("pageSize", String(pageSize));
+
+    router.push(`/vocabulary?${params.toString()}`);
+  };
+
+  const handleChangePageSize = (current: number, pageSize: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    params.set("page", "1");
+    params.set("pageSize", String(pageSize));
+
+    router.push(`/vocabulary?${params.toString()}`);
+  };
+
   return (
     <div className="py-10 px-10 space-y-8">
       <div>
@@ -115,20 +106,36 @@ const VocabularyPage = () => {
         </button>
       </div>
 
-      <div className="flex overflow-x-auto pb-2 scrollbar-hide gap-2">
+      <ScrollContainer className="flex gap-2">
+        <Button
+          className={`min-w-27.5 py-2 rounded-full! text-sm font-medium transition-all ${
+            activeTopic === "Tất cả"
+              ? "bg-red-500 text-white shadow-md shadow-red-200 border-transparent"
+              : "bg-white text-gray-700! border border-gray-200 hover:bg-primary/70! hover:text-white! shadow-none!"
+          }`}
+          onClick={() => {
+            setActiveTopic("Tất cả");
+            router.push("/vocabulary");
+          }}
+        >
+          Tất cả
+        </Button>
         {topics.map((topic, index) => (
           <Button
             key={index}
-            className={`min-w-27.5 py-2 rounded-full! text-sm font-medium transition-all ${activeTopic === topic ? "bg-red-500 text-white shadow-md shadow-red-200 border-transparent" : "bg-white text-gray-700! border border-gray-200 hover:bg-primary/70! hover:text-white! shadow-none!"}`}
-            onClick={() => setActiveTopic(topic)}
+            className={`min-w-27.5 py-2 rounded-full! text-sm font-medium transition-all ${activeTopic === topic.name ? "bg-red-500 text-white shadow-md shadow-red-200 border-transparent" : "bg-white text-gray-700! border border-gray-200 hover:bg-primary/70! hover:text-white! shadow-none!"}`}
+            onClick={() => {
+              setActiveTopic(topic.name);
+              router.push(`/vocabulary?topicId=${topic._id}`);
+            }}
           >
-            {topic}
+            {topic.name}
           </Button>
         ))}
-      </div>
+      </ScrollContainer>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {mockVocabulary.map((item, index) => (
+        {vocabulary.map((item, index) => (
           <Card
             key={index}
             className="group overflow-hidden border border-slate-200 rounded-2xl! hover:shadow-xl! shadow-lg! transition-all cursor-pointer"
@@ -136,7 +143,7 @@ const VocabularyPage = () => {
             <CardContent className="p-0 relative">
               <div className="absolute top-0 left-0 w-full flex items-center justify-between px-4 py-3 bg-slate-200 border-b border-slate-200">
                 <span className="text-xs border border-black px-2 py-[2px] rounded-full font-medium">
-                  {item.level}
+                  HSK {item.level}
                 </span>
 
                 <div className="flex items-center gap-3 text-slate-400">
@@ -170,12 +177,22 @@ const VocabularyPage = () => {
           </Card>
         ))}
 
-        {mockVocabulary.length === 0 && (
+        {vocabulary.length === 0 && (
           <div className="col-span-full py-12 text-center text-slate-500">
             Không tìm thấy từ vựng nào phù hợp với tìm kiếm của bạn.
           </div>
         )}
       </div>
+
+      <Pagination
+        align="end"
+        current={page}
+        pageSize={pageSize}
+        total={total}
+        showSizeChanger
+        onChange={handleChangePage}
+        onShowSizeChange={handleChangePageSize}
+      />
     </div>
   );
 };

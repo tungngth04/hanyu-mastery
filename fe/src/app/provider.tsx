@@ -16,7 +16,10 @@ function InnerProvider({ main }: { main: React.ReactNode }) {
   const dispatch = useAppDispatch();
   const { notify } = useNotification();
 
-  const token = localStorage.getItem("access-token");
+  const token = LocalStorage.getLocalStorage<string | null>(
+    "access-token",
+    null,
+  );
   useEffect(() => {
     if (pathname === "/") return;
 
