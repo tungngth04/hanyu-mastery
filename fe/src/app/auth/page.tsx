@@ -1,7 +1,7 @@
-import LoginPage from "@/src/components/templates/_auth/login";
+import AuthPage from "@/src/components/templates/_auth";
 
 function Page() {
-  return <LoginPage />;
+  return <AuthPage />;
 }
 
 export default Page;

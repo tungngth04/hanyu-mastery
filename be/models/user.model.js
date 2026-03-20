@@ -1,6 +1,13 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
+const avatars = [
+  'https://i.pravatar.cc/100?u=1',
+  'https://i.pravatar.cc/100?u=2',
+  'https://i.pravatar.cc/100?u=3',
+  'https://i.pravatar.cc/100?u=4',
+];
+
 const userSchema = new mongoose.Schema(
   {
     // auth
@@ -8,7 +15,13 @@ const userSchema = new mongoose.Schema(
     email: String,
     password: String,
     // profile
-    avatar: String,
+    avatar: {
+      type: String,
+      default: () => {
+        const randomIndex = Math.floor(Math.random() * avatars.length);
+        return avatars[randomIndex];
+      },
+    },
     learningGoal: String,
 
     // learning
@@ -17,7 +30,7 @@ const userSchema = new mongoose.Schema(
       default: 0,
     },
 
-    lastStudyDate: Date, 
+    lastStudyDate: Date,
     // nhắc học
     notification: {
       type: Boolean,

@@ -30,6 +30,16 @@ export const postLogin = createAsyncThunk(
   },
 );
 
+export const postRegister = createAsyncThunk(
+  "auth/postRegister",
+  async (values: object, { rejectWithValue }) => {
+    try {
+      await RequestMethod.post(apiConstant.auth.register, values);
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
 export interface UserInfoState {
   isFetching: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

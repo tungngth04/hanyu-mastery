@@ -3,7 +3,7 @@ const { password } = require('./custom.validation');
 
 const register = {
   body: joi.object({
-    fullname: joi.string().min(2).max(45).required().messages({
+    fullName: joi.string().min(2).max(45).required().messages({
       'any.required': 'Vui lòng điền tên người dùng',
     }),
     email: joi.string().email().required().messages({

@@ -5,13 +5,17 @@ import Image from "next/image";
 import { useAppDispatch } from "@/src/hooks/useHookReducers";
 import { clearAuth } from "@/src/services/auth";
 import useNotification from "@/src/hooks/useNotification";
+import LocalStorage from "@/src/helpers/local-storage";
 
 const Header = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { notify } = useNotification();
 
-  const token = localStorage.getItem("access-token");
+  const token = LocalStorage.getLocalStorage<string | null>(
+    "access-token",
+    null,
+  );
 
   const handleLogout = async () => {
     await dispatch(clearAuth());
