@@ -1,9 +1,6 @@
 import apiConstant from "@/src/constants/api.constant";
 import { RequestMethod } from "@/src/hooks/useHookReducers";
-import {
-  IVocabularyResponse,
-  IVocabularyTopic,
-} from "@/src/types/interface";
+import { IVocabularyResponse, IVocabularyTopic } from "@/src/types/interface";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const getTopic = createAsyncThunk<IVocabularyTopic[], void>(

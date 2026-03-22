@@ -2,6 +2,7 @@ import apiConstant from "@/src/constants/api.constant";
 import { RequestMethod } from "@/src/hooks/useHookReducers";
 import { IUser } from "@/src/types/interface";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { updateNotification, updateProfile } from "../users";
 
 export const getCurrentUser = createAsyncThunk(
   "auth/getCurrentUser",
@@ -80,6 +81,14 @@ const authSlice = createSlice({
       state.isFetching = true;
       state.error = action.error;
       state.userInfor = null;
+    });
+    builder.addCase(updateNotification.fulfilled, (state, action) => {
+      if (state.userInfor) {
+        state.userInfor.notification = action.payload.notification;
+      }
+    });
+    builder.addCase(updateProfile.fulfilled, (state, action) => {
+      state.userInfor = action.payload;
     });
   },
 });

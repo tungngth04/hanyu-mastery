@@ -57,7 +57,7 @@ const Header = () => {
           >
             <div className="absolute -top-2 right-6 w-4 h-4 bg-purple-300 rotate-45"></div>
             <div className="pt-4 pb-2 font-semibold text-center text-lg">
-              {userInfor?.fullname}
+              {userInfor?.fullName}
             </div>
 
             <div className="px-6">

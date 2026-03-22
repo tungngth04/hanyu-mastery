@@ -17,6 +17,11 @@ const apiConstant = {
   flashcard: {
     getByDeckId: (id: string) => `/flashcard/${id}`,
   },
+  users: {
+    updateNotification: "/users/notification",
+    updateProfile: "/users/profile",
+    changePassword: "/auth/change-password",
+  },
 };
 
 export default apiConstant;

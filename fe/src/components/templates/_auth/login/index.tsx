@@ -89,7 +89,9 @@ const LoginPage = () => {
                   className="pl-10 h-12 rounded-3xl shadow-md placeholder:text-sm text-slate-800 focus:outline-none focus:border-primary focus:ring-primary/90 transition w-full border border-slate-400"
                 />
               </div>
-              <p>{errors.email && touched.email && <>{errors.email}</>}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.email && touched.email && <>{errors.email}</>}
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -117,7 +119,7 @@ const LoginPage = () => {
                   {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                 </button>
               </div>
-              <p>
+              <p className="text-red-500 text-sm mt-1">
                 {errors.password && touched.password && <>{errors.password}</>}
               </p>
             </div>
