@@ -88,11 +88,14 @@ const refreshToken = catchAsync(async (req, res) => {
 });
 
 const getCurrentUser = catchAsync(async (req, res) => {
+  const user = req.user.toObject();
+  delete user.password;
+
   res.status(httpStatus.OK).json({
     code: httpStatus.OK,
     message: 'Lấy thông tin người dùng thành công',
     data: {
-      user: req.user,
+      user,
     },
   });
 });

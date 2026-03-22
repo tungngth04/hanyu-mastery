@@ -24,6 +24,7 @@ const listRoutesApi = [
     route: require('./user_deck_progress.route'),
   },
   { path: '/flashcard', route: require('./flashcard.route') },
+  { path: '/users', route: require('./user.route') },
 ];
 
 listRoutesApi.forEach((route) => {
