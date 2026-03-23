@@ -36,7 +36,6 @@ const ProfilePage = () => {
 
   const dispatch = useAppDispatch();
   const { notify } = useNotification();
-  console.log("first", userInfor);
 
   const stats = [
     { label: "Trình độ", value: "HSK 3", icon: Award, color: "text-amber-500" },
@@ -172,7 +171,7 @@ const ProfilePage = () => {
                   <label className="text-sm">Mục tiêu học tập</label>
                   <div className=" bg-gray-100 px-3 py-3 rounded-2xl items-center gap-2 shadow-lg">
                     <input
-                      className="text-slate-500 text-sm"
+                      className="text-slate-500 text-sm w-full"
                       value={userInfor?.learningGoal || ""}
                       disabled={!isEditing}
                     />

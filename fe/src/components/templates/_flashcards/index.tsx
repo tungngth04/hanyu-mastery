@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "../../atoms/card";
 import Button from "../../atoms/button";
 import {
@@ -9,84 +9,40 @@ import {
   Play,
   Search,
   TrendingUp,
+  X,
   Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useAppDispatch } from "@/src/hooks/useHookReducers";
+import useNotification from "@/src/hooks/useNotification";
+import {
+  getAllFlashCardDeck,
+  getFlashcardStats,
+} from "@/src/services/flashCardDeck";
+import { IFlashCardDeckItem } from "@/src/types/interface";
+import { Pagination } from "antd";
 
 function FlashcardsPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [search, setSearch] = useState("");
   const [activeLevel, setActiveLevel] = useState("Tất cả");
+  const [flashCardDecks, setFlashCardDecks] = useState<IFlashCardDeckItem[]>(
+    [],
+  );
+  const [stats, setStats] = useState({
+    totalCards: 0,
+    totalCompleted: 0,
+    progress: "0%",
+    streak: "0 ngày",
+  });
+
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+
   const router = useRouter();
-
-  const decks = [
-    {
-      id: 1,
-      title: "Ôn tập HSK 4 - Cấp tốc",
-      topic: "Công việc & Xã hội",
-      level: "HSK 4",
-      cards: 25,
-      completed: 18,
-      lastStudied: "Hôm nay",
-      color: "from-blue-500 to-cyan-500",
-      icon: "💼",
-    },
-    {
-      id: 2,
-      title: "Từ vựng Du lịch - Tây Tạng",
-      topic: "Du lịch & Văn hóa",
-      level: "HSK 3",
-      cards: 30,
-      completed: 12,
-      lastStudied: "2 ngày trước",
-      color: "from-orange-500 to-red-500",
-      icon: "✈️",
-    },
-    {
-      id: 3,
-      title: "Giao tiếp Nhà hàng",
-      topic: "Ăn uống & Giao tiếp",
-      level: "HSK 2",
-      cards: 20,
-      completed: 20,
-      lastStudied: "1 tuần trước",
-      color: "from-emerald-500 to-green-500",
-      icon: "🍜",
-    },
-    {
-      id: 4,
-      title: "Từ vựng Học tập",
-      topic: "Giáo dục",
-      level: "HSK 3",
-      cards: 28,
-      completed: 5,
-      lastStudied: "Chưa học",
-      color: "from-purple-500 to-pink-500",
-      icon: "📚",
-    },
-    {
-      id: 5,
-      title: "Cụm từ Thương mại",
-      topic: "Kinh tế & Thương mại",
-      level: "HSK 5",
-      cards: 35,
-      completed: 8,
-      lastStudied: "3 ngày trước",
-      color: "from-indigo-500 to-blue-500",
-      icon: "💰",
-    },
-    {
-      id: 6,
-      title: "Thành ngữ Cổ điển",
-      topic: "Văn hóa & Thành ngữ",
-      level: "HSK 6",
-      cards: 40,
-      completed: 0,
-      lastStudied: "Chưa học",
-      color: "from-amber-500 to-orange-500",
-      icon: "🎋",
-    },
-  ];
-
+  const dispatch = useAppDispatch();
+  const { notify } = useNotification();
   const levels = [
     "Tất cả",
     "HSK 1",
@@ -100,7 +56,7 @@ function FlashcardsPage() {
   const statis = [
     {
       label: "Tổng thẻ",
-      value: "178",
+      value: stats.totalCards,
       icon: BookOpen,
       color: "text-blue-500",
       bg: "bg-blue-50!",
@@ -108,7 +64,7 @@ function FlashcardsPage() {
     },
     {
       label: "Đã thuộc",
-      value: "63",
+      value: stats.totalCompleted,
       icon: CircleCheck,
       color: "text-green-500",
       bg: "bg-green-50!",
@@ -116,7 +72,7 @@ function FlashcardsPage() {
     },
     {
       label: "Tiến độ",
-      value: "35%",
+      value: stats.progress,
       icon: TrendingUp,
       color: "text-purple-500",
       bg: "bg-purple-50!",
@@ -124,7 +80,7 @@ function FlashcardsPage() {
     },
     {
       label: "Chuỗi học",
-      value: "5 ngày liên tục",
+      value: stats.streak,
       icon: Zap,
       color: "text-yellow-500",
       bg: "bg-yellow-50!",
@@ -132,14 +88,78 @@ function FlashcardsPage() {
     },
   ];
 
-  const filteredDecks = decks.filter((deck) => {
-    const matchesSearch =
-      deck.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      deck.topic.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesLevel = activeLevel === "Tất cả" || deck.level === activeLevel;
-    return matchesSearch && matchesLevel;
-  });
+  const colors = [
+    "from-blue-500 to-cyan-500",
+    "from-emerald-500 to-green-500",
+    "from-orange-500 to-red-500",
+    "from-purple-500 to-pink-500",
+    "from-indigo-500 to-blue-500",
+    "from-amber-500 to-orange-500",
+  ];
 
+  const icons = ["📘", "🍜", "✈️", "💼", "💰", "🎋"];
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchData = async () => {
+      try {
+        const result = await dispatch(
+          getAllFlashCardDeck({
+            page,
+            pageSize,
+            search,
+            level: activeLevel,
+          }),
+        ).unwrap();
+        if (isMounted && result) {
+          const decksWithRandomStyle = result.flashcardDecks.map(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (deck: any) => ({
+              ...deck,
+              color: colors[Math.floor(Math.random() * colors.length)],
+              icon: icons[Math.floor(Math.random() * icons.length)],
+            }),
+          );
+
+          setFlashCardDecks(decksWithRandomStyle);
+          setTotal(result.totalResults);
+          notify("success", "Lấy dữ liệu thành công");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [page, pageSize, search, activeLevel]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const result = await dispatch(getFlashcardStats()).unwrap();
+        setStats(result);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const handleChangePage = (page: number, pageSize: number) => {
+    setPage(page);
+    setPageSize(pageSize);
+  };
+
+  const handleChangePageSize = (current: number, size: number) => {
+    setPage(1);
+    setPageSize(size);
+  };
   return (
     <>
       <div className="space-y-8 py-10 px-20">
@@ -174,8 +194,28 @@ function FlashcardsPage() {
           <input
             type="text"
             placeholder="Tìm kiếm bộ flashcard..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                setSearch(searchQuery);
+                setPage(1);
+              }
+            }}
             className="pl-9 w-full pr-4 py-3 bg-white rounded-2xl! border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />
+          {searchQuery && (
+            <span
+              onClick={() => {
+                setSearchQuery("");
+                setSearch("");
+                setPage(1);
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-slate-400 hover:text-black"
+            >
+              <X />
+            </span>
+          )}
         </div>
 
         <div className="flex overflow-x-auto pb-2 gap-2 scrollbar-hide">
@@ -183,7 +223,10 @@ function FlashcardsPage() {
             <Button
               key={index}
               className={`rounded-full! whitespace-nowrap shrink-0 px-4 py-2 text-sm ${activeLevel === item ? "bg-red-500 text-white shadow-md shadow-red-200 " : "bg-white text-gray-700! hover:bg-primary/70! border border-slate-200 shadow-none! hover:text-white!"}`}
-              onClick={() => setActiveLevel(item)}
+              onClick={() => {
+                setActiveLevel(item);
+                setPage(1);
+              }}
             >
               {item}
             </Button>
@@ -191,16 +234,16 @@ function FlashcardsPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredDecks.map((item, index) => (
+          {flashCardDecks.map((item, index) => (
             <Card
-              key={index}
+              key={item._id}
               className="group overflow-hidden border border-slate-200 rounded-2xl! hover:shadow-xl! shadow-lg! transition-all cursor-pointer  slide-left delay-100"
             >
               <CardContent className="p-0 relative">
                 <div
-                  className={`absolute top-0 left-0 w-full px-4 py-6 h-32 bg-linear-to-br ${item.color} border-b border-slate-200 text-white flex flex-col gap-4`}
+                  className={`absolute top-0 left-0 w-full px-4 py-6 h-32 bg-linear-to-br ${item?.color} border-b border-slate-200 text-white flex flex-col gap-4`}
                 >
-                  <div className="text-4xl">{item.icon}</div>
+                  <div className="text-4xl">{item?.icon}</div>
                   <h3 className="font-bold text-lg group-hover:translate-x-1 transition-transform">
                     {item.title}
                   </h3>
@@ -241,7 +284,7 @@ function FlashcardsPage() {
                     <Button
                       size="sm"
                       className="gap-1 rounded-lg bg-primary hover:bg-primary/90 whitespace-nowrap inline-flex items-center"
-                      onClick={() => router.push(`/flashcards/${item.id}`)}
+                      onClick={() => router.push(`/flashcards/${item._id}`)}
                     >
                       <Play size={14} /> Học
                     </Button>
@@ -251,6 +294,15 @@ function FlashcardsPage() {
             </Card>
           ))}
         </div>
+        <Pagination
+          className="mt-4 flex justify-end"
+          current={page}
+          pageSize={pageSize}
+          total={total}
+          showSizeChanger
+          onChange={handleChangePage}
+          onShowSizeChange={handleChangePageSize}
+        />
       </div>
     </>
   );

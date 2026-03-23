@@ -7,8 +7,7 @@ import useNotification from "@/src/hooks/useNotification";
 import { postLogin, updateUserInfor } from "@/src/services/auth";
 import { loginValidate } from "@/src/types/validates";
 import { Field, Form, Formik } from "formik";
-import { ArrowRight, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
-import Image from "next/image";
+import { ArrowRight, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 

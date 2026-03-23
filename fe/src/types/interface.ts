@@ -41,3 +41,34 @@ export interface IVocabularyResponse {
   totalPage: number;
   totalResults: number;
 }
+
+// Interface cho từng flashcard deck
+export interface IFlashCardDeckItem {
+  _id: string;
+  title: string;
+  topic: string;
+  level: string; // "HSK 1", "HSK 2", ...
+  userId: string;
+  isSystem: boolean;
+  cards: number; // tổng số flashcard
+  completed: number; // số flashcard đã học
+  lastStudied: string; // ví dụ: "Chưa học"
+  icon?: string;
+  color?: string;
+}
+
+// Interface cho response data
+export interface IFlashCardDeckData {
+  flashcardDecks: IFlashCardDeckItem[];
+  pageSize: number;
+  currentPage: number;
+  totalPage: number;
+  totalResults: number;
+}
+
+// Interface tổng response API
+export interface IFlashCardDeck {
+  code: number;
+  message: string;
+  data: IFlashCardDeckData;
+}

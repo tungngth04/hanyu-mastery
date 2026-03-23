@@ -3,6 +3,7 @@ const apiConstant = {
     login: "/auth/login",
     register: "/auth/register",
     getProfile: "/auth/me",
+    refreshToken: "auth/refresh-token",
   },
   vocabularyTopic: {
     getAll: "/vocabulary-topic/get-all-topic",
@@ -11,8 +12,9 @@ const apiConstant = {
     getAll: "/vocabulary",
     getByTopicId: (id: string) => `/vocabulary/${id}`,
   },
-  flashcardDeck: {
+  flashCardDeck: {
     getAll: "/flashcard-deck",
+    getStats: "/flashcard-deck/stats",
   },
   flashcard: {
     getByDeckId: (id: string) => `/flashcard/${id}`,
@@ -20,7 +22,10 @@ const apiConstant = {
   users: {
     updateNotification: "/users/notification",
     updateProfile: "/users/profile",
-    changePassword: "/auth/change-password",
+    changePassword: "/users/change-password",
+  },
+  supports: {
+    createSupport: "/supports/create-support",
   },
 };
 

@@ -29,22 +29,18 @@ class Request {
       baseURL,
       timeout: API_REQUEST_TIMEOUT,
       headers: {
-        "Content-Type": "Application/json",
+        "Content-Type": "application/json",
       },
       responseType: "json",
-      validateStatus: (status) =>
-        status === 403 ? false : status >= 200 && status < 300,
     });
 
     this.axiosNoAuth = axios.create({
       baseURL,
       timeout: API_REQUEST_TIMEOUT,
       headers: {
-        "Content-Type": "Application/json",
+        "Content-Type": "application/json",
       },
       responseType: "json",
-      validateStatus: (status) =>
-        status === 403 ? false : status >= 200 && status < 300,
     });
 
     this.axios.interceptors.request.use((config) => {
@@ -67,11 +63,7 @@ class Request {
 
         const originalRequest = error.config as CustomAxiosRequestConfig;
 
-        if (
-          (status === 401 ||
-            (data.code === 500 && data.message === "jwt expired")) &&
-          !originalRequest._retry
-        ) {
+        if (status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
           try {
             const refreshedToken = await this.refreshAccessToken();
@@ -82,6 +74,10 @@ class Request {
                   `Bearer ${refreshedToken}`;
               }
               return this.axios(originalRequest);
+            } else {
+              LocalStorage.removeLocalStorage("access-token");
+              CookieStorage.removeCookie("refresh-token");
+              window.location.href = "/login";
             }
           } catch (refreshError) {
             return Promise.reject(refreshError);
@@ -99,7 +95,7 @@ class Request {
     if (!refreshToken) return null;
 
     try {
-      const response = await this.axios.post("/auth/refresh-token", {
+      const response = await this.axiosNoAuth.post("/auth/refresh-token", {
         refreshToken,
       });
       if (response.status === 200) {

@@ -65,3 +65,14 @@ export const profileValidate = () => {
     learningGoal: Yup.string().required("Vui lòng nhập mục tiêu"),
   });
 };
+
+export const supportValidate = () => {
+  return Yup.object({
+    fullName: Yup.string().required("Vui lòng nhập họ tên"),
+    email: Yup.string()
+      .required("Vui lòng nhập email")
+      .email("Đây không phải định dạng email"),
+    subject: Yup.string().required("Vui lòng nhập vấn đề cần hỗ trợ"),
+    message: Yup.string().required("Vui lòng nhập nội dung chi tiết"),
+  });
+};

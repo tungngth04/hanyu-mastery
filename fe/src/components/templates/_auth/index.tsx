@@ -27,50 +27,6 @@ type RegisterValues = {
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState<boolean>(true);
   const router = useRouter();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-
-  const dispatch = useAppDispatch();
-  const { notify } = useNotification();
-
-  const handleSubmit = async (values: LoginValues | RegisterValues) => {
-    try {
-      setLoading(true);
-      let result;
-
-      if (isLogin) {
-        result = await dispatch(
-          postLogin({
-            email: values.email,
-            password: values.password,
-          }),
-        ).unwrap();
-
-        LocalStorage.setLocalStorage("access-token", result.accessToken);
-        CookieStorage.setCookie("refresh-token", result.refreshToken);
-        if (result) {
-          notify("success", "Đăng nhập thành công");
-        }
-
-        router.push("/app");
-      } else {
-        return;
-      }
-
-      if (result?.user) {
-        await dispatch(updateUserInfor(result.user));
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      notify(
-        "error",
-        error?.message || "Không thể đăng nhập, vui lòng thử lại sau!",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
@@ -95,7 +51,11 @@ const AuthPage = () => {
               ? "Nhập thông tin của bạn để tiếp tục hành trình chinh phục tiếng Trung."
               : "Bắt đầu hành trình học tập thông minh ngay hôm nay."}
           </p>
-          {isLogin ? <LoginPage /> : <RegisterPage onChange={() => setIsLogin(true)} />}
+          {isLogin ? (
+            <LoginPage />
+          ) : (
+            <RegisterPage onChange={() => setIsLogin(true)} />
+          )}
 
           <div className="w-full flex justify-center mt-6">
             <p className="text-xs text-slate-500 font-black">
