@@ -13,9 +13,16 @@ const auth = catchAsync(async (req, res, next) => {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Vui lòng đăng nhập hệ thống');
   }
 
-  const payload = jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET);
+  let payload;
+
+  try {
+    payload = jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET);
+  } catch (error) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Token không hợp lệ hoặc đã hết hạn');
+  }
 
   const user = await User.findById(payload.id);
+
   if (!user) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Vui lòng đăng nhập hệ thống');
   }

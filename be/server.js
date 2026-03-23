@@ -23,7 +23,25 @@ app.use(express.static('public'));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(prefixPath, apiRoute);
 
-app.use((err, req, res, next) => {
+const sendReminder = require('./helpers/sendReminder');
+
+if (process.env.NODE_ENV === 'development') {
+  const cron = require('node-cron');
+  cron.schedule('54 10 * * *', sendReminder);
+  console.log('Node-cron schedule active (development)');
+}
+
+app.post('/cron/reminder', async (req, res) => {
+  try {
+    await sendReminder();
+    res.send('OK');
+  } catch (err) {
+    console.error('Error running cron job:', err);
+    res.status(500).send('Error running cron job');
+  }
+});
+
+app.use((err, req, res) => {
   const statusCode = err.status || 500;
 
   res.status(statusCode).json({

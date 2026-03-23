@@ -49,4 +49,41 @@ const { auth } = require('../middlewares/auth.middleware');
  */
 router.get('/', auth, middleware(validate.getAllFlashcardDeck), controller.getAllFlashcardDeck);
 
+/**
+ * @swagger
+ * /flashcard-deck/stats:
+ *   get:
+ *     summary: Lấy thống kê flashcard của user
+ *     tags: [FlashcardDeck]
+ *     responses:
+ *       200:
+ *         description: Lấy thống kê thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: number
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: Lấy thống kê thành công
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalCards:
+ *                       type: number
+ *                       example: 178
+ *                     totalCompleted:
+ *                       type: number
+ *                       example: 63
+ *                     progress:
+ *                       type: string
+ *                       example: "35%"
+ *                     streak:
+ *                       type: string
+ *                       example: "5 ngày liên tục"
+ */
+router.get('/stats', auth, controller.getFlashcardStats);
 module.exports = router;

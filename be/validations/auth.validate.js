@@ -29,8 +29,11 @@ const login = {
 };
 
 const refreshToken = {
-  body: joi.string().required().messages({
-    'any.required': 'Vui lòng điền refresh token',
+  body: joi.object({
+    refreshToken: joi.string().required().messages({
+      'any.required': 'Vui lòng điền refresh token',
+    }),
+    'string.empty': 'Refresh token không được để trống',
   }),
 };
 module.exports = {

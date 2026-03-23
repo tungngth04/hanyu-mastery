@@ -1,7 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
-const controller = require('../controllers/auth.controllers');
+const controller = require('../controllers/auth.controller');
 const validate = require('../validations/auth.validate');
 const middleware = require('../middlewares/validate.middleware');
 
@@ -23,7 +23,7 @@ const { auth } = require('../middlewares/auth.middleware');
  *               - email
  *               - password
  *             properties:
- *               fullname:
+ *               fullName:
  *                 type: string
  *                 example: Nguyễn Văn A
  *               email:

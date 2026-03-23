@@ -25,6 +25,7 @@ const listRoutesApi = [
   },
   { path: '/flashcard', route: require('./flashcard.route') },
   { path: '/users', route: require('./user.route') },
+  { path: '/supports', route: require('./support.routes') },
 ];
 
 listRoutesApi.forEach((route) => {
