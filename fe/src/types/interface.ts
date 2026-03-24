@@ -72,3 +72,37 @@ export interface IFlashCardDeck {
   message: string;
   data: IFlashCardDeckData;
 }
+
+// video
+export interface IVideoItem {
+  _id: string;
+  type: string;
+  description: string;
+  title: string;
+  thumbnail?: string;
+  videoId?: string;
+  videoUrl?: string;
+  duration?: number;
+  views: number;
+  level?: string | number;
+  createdBy?: {
+    _id: string;
+    name?: string;
+  };
+  author?: string;
+  publishedAt?: string;
+}
+
+export interface IVideoData {
+  videos: IVideoItem[];
+  pageSize: number;
+  currentPage: number;
+  totalPage: number;
+  totalResults: number;
+}
+
+export interface IVideo {
+  code: number;
+  message: string;
+  data: IVideoData;
+}

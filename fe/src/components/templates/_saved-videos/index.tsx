@@ -92,7 +92,17 @@ const SavedVideoPage = () => {
   return (
     <div className="p-10 space-y-6">
       <div className="space-y-2 ">
-        <h1 className="text-3xl font-black ">Video đã lưu</h1>
+        <div className="flex justify-between">
+          <h1 className="text-3xl font-black ">Video đã lưu</h1>
+
+          <Button
+            size="sm"
+            className="gap-1 rounded-lg bg-primary hover:bg-primary/90 whitespace-nowrap inline-flex items-center"
+            onClick={() => router.back()}
+          >
+            Quay lại
+          </Button>
+        </div>
         <p className="text-slate-500">5 video • 5 tổng cộng</p>
       </div>
 

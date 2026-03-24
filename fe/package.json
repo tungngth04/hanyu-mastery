@@ -21,6 +21,7 @@
     "react-indiana-drag-scroll": "^2.2.1",
     "react-redux": "^9.2.0",
     "react-toastify": "^11.0.5",
+    "react-youtube": "^10.1.0",
     "sass": "^1.97.3",
     "tailwindcss-animate": "^1.0.7",
     "yup": "^1.7.1"

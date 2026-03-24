@@ -27,6 +27,10 @@ const apiConstant = {
   supports: {
     createSupport: "/supports/create-support",
   },
+  videos: {
+    getAll: "/videos",
+    getVideoById: (id: string) => `/videos/${id}`,
+  },
 };
 
 export default apiConstant;

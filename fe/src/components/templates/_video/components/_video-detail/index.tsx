@@ -1,22 +1,50 @@
 "use client";
-import {
-  Bookmark,
-  Clock,
-  MessageCircle,
-  Play,
-  Plus,
-  ThumbsUp,
-  Volume2,
-} from "lucide-react";
-import { useState } from "react";
+import { Bookmark, Clock, MessageCircle, Plus, ThumbsUp } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Button from "@/src/components/atoms/button";
 import { Card, CardContent } from "@/src/components/atoms/card";
+import { useAppDispatch } from "@/src/hooks/useHookReducers";
+import useNotification from "@/src/hooks/useNotification";
+import { getVideoById } from "@/src/services/video/inedx";
+import { IVideoItem } from "@/src/types/interface";
+import { formatTimeAgo } from "@/src/helpers/format-time";
+import YouTube from "react-youtube";
 
 const VideoDetail = () => {
+  const params = useParams();
+  const id = params.id as string;
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { notify } = useNotification();
   const [comment, setComment] = useState("");
+  const [video, setVideo] = useState<IVideoItem>();
+  const [notes, setNotes] = useState([]);
+  const [progress, setProgress] = useState(null);
+  const playerRef = useRef(null);
+  useEffect(() => {
+    const fetchVideo = async () => {
+      try {
+        const result = await dispatch(getVideoById(id)).unwrap();
+
+        setVideo(result.video);
+        setNotes(result.notes);
+        setProgress(result.progress);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    if (id) fetchVideo();
+  }, [id]);
+  console.log("ádasdasd", video);
+
+  const formatViews = (views: number) => {
+    if (views >= 1_000_000) return (views / 1_000_000).toFixed(1) + "M";
+    if (views >= 1_000) return (views / 1_000).toFixed(1) + "K";
+    return views.toString();
+  };
 
   const comments = [
     {
@@ -48,18 +76,6 @@ const VideoDetail = () => {
     },
   ];
 
-  const videos = {
-    id: 1,
-    title: "100 câu giao tiếp tiếng Trung cơ bản nhất định phải biết",
-    thumbnail:
-      "https://images.unsplash.com/photo-1544257122-38d58c148da3?q=80&w=2938",
-    duration: "15:20",
-    views: "12.5k",
-    level: "HSK 1",
-    author: "Cô giáo Thảo",
-    day: "2 tuần trước",
-  };
-
   return (
     <div className="p-10 flex flex-col gap-10">
       <div className="flex justify-end">
@@ -73,31 +89,29 @@ const VideoDetail = () => {
       </div>
       <div className="flex flex-col xl:flex-row gap-8">
         <div className="flex-1 space-y-6">
-          <div className="bg-linear-to-br from-blue-900 to-slate-900 rounded-2xl h-105 flex flex-col items-center justify-center text-white shadow-lg">
-            <Play size={60} />
-            <p className="mt-2 text-sm text-slate-300">Video Player</p>
-          </div>
-
-          <div className="items-center gap-2 text-xs text-slate-500">
-            <div className="flex-1 bg-slate-200 rounded-full h-2 relative">
-              <span className="absolute -top-1 left-0 w-4 h-4 bg-red-500 rounded-full"></span>
-            </div>
-            <div className="flex justify-between mt-2 text-sm">
-              <span>0:00</span>
-              <span>3:00</span>
-            </div>
+          <div className="rounded-2xl overflow-hidden">
+            {video?.type === "youtube" ? (
+              <YouTube
+                videoId={video.videoId}
+                opts={{
+                  width: "100%",
+                  height: "500",
+                }}
+                onReady={(event) => {
+                  playerRef.current = event.target;
+                }}
+              />
+            ) : (
+              <video
+                className="w-full h-125 object-cover"
+                src={video?.videoUrl}
+                controls
+              />
+            )}
           </div>
 
           <div className="flex justify-between">
-            <div className="flex gap-3">
-              <button className="flex justify-center items-center gap-2 bg-red-500 text-white rounded-2xl px-4 py-1.5 text-sm hover:bg-red-600 cursor-pointer">
-                <Play size={16} />
-                Phát
-              </button>
-              <button className="flex justify-center items-center gap-2  border rounded-2xl px-4 py-1.5 text-sm hover:bg-slate-100 cursor-pointer">
-                <Volume2 size={16} /> Âm lượng
-              </button>
-            </div>
+            <div></div>
             <button className="flex justify-center items-center gap-2  border rounded-2xl px-4 py-1.5 text-sm hover:bg-slate-100 cursor-pointer">
               <Bookmark size={16} />
               Lưu video
@@ -106,18 +120,24 @@ const VideoDetail = () => {
 
           <Card>
             <CardContent className="space-y-4">
-              <h3 className="text-3xl font-bold">{videos.title}</h3>
+              <h3 className="text-3xl font-bold line-clamp-2">
+                {video?.title}
+              </h3>
               <p className="text-slate-500">
-                {videos.author} • {videos.views} lượt xem • {videos.day}
+                {video?.type === "youtube"
+                  ? video?.author
+                  : video?.type === "s3"
+                    ? video.createdBy?.name
+                    : "Tác giả ẩn danh"}{" "}
+              </p>
+              <p className="text-slate-500">
+                {formatViews(video?.views ?? 0)} lượt xem •{" "}
+                {formatTimeAgo(video?.publishedAt)}
               </p>
               <p className="bg-blue-100 hover:bg-blue-200 text-blue-600 py-0.5 px-4 rounded-full text-xs font-semibold w-fit">
-                {videos.level}
+                HSK {video?.level}
               </p>
-              <p className="text-slate-500">
-                Bài giảng này cung cấp 100 câu giao tiếp cơ bản nhất trong tiếng
-                Trung Quốc. Phù hợp cho những bạn mới bắt đầu học. Mỗi câu sẽ
-                được giảng chi tiết với phiên âm, ví dụ và cách sử dụng.
-              </p>
+              <p className="text-slate-500">{video?.description}</p>
             </CardContent>
           </Card>
 
