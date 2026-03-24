@@ -45,8 +45,6 @@ const login = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Tài khoàn hoặc mật khẩu không chính xác');
   }
 
-  // user.password = undefined;
-
   const accessToken = generateAccessToken({ id: user._id });
   const refreshToken = generateRefreshToken({ id: user._id });
 
@@ -54,7 +52,6 @@ const login = catchAsync(async (req, res) => {
     message: 'Đăng nhập thành công',
     code: httpStatus.OK,
     data: {
-      // user,
       accessToken,
       refreshToken,
     },

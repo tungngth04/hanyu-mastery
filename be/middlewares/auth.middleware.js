@@ -17,6 +17,7 @@ const auth = catchAsync(async (req, res, next) => {
 
   try {
     payload = jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET);
+    // eslint-disable-next-line no-unused-vars
   } catch (error) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Token không hợp lệ hoặc đã hết hạn');
   }
