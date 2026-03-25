@@ -11,7 +11,7 @@ const updateNotification = catchAsync(async (req, res) => {
   const userObj = user.toObject();
   delete userObj.password;
 
-  res.status(200).json({
+  res.status(httpStatus.OK).json({
     message: 'Cập nhật notification thành công',
     data: {
       user: userObj,
@@ -27,7 +27,7 @@ const updateProfile = catchAsync(async (req, res) => {
   const userObj = user.toObject();
   delete userObj.password;
 
-  res.status(200).json({
+  res.status(httpStatus.OK).json({
     message: 'Cập nhật hồ sơ thành công',
     data: {
       user: userObj,

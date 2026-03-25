@@ -9,7 +9,7 @@ const listRoutesApi = [
   },
   {
     path: '/vocabulary-topic',
-    route: require('./vocabulary_topic.route'),
+    route: require('./vocabularyTopic.route'),
   },
   {
     path: '/vocabulary',
@@ -17,11 +17,11 @@ const listRoutesApi = [
   },
   {
     path: '/flashcard-deck',
-    route: require('./flashcard_deck.route'),
+    route: require('./flashcardDeck.route'),
   },
   {
     path: '/user-deck-progress',
-    route: require('./user_deck_progress.route'),
+    route: require('./userDeckProgress.route'),
   },
   { path: '/flashcard', route: require('./flashcard.route') },
   { path: '/users', route: require('./user.route') },
@@ -38,6 +38,7 @@ const listRoutesApi = [
     path: '/video-note',
     route: require('./videoNote.route'),
   },
+  { path: '/video-save', route: require('./videoSave.route') },
 ];
 
 listRoutesApi.forEach((route) => {

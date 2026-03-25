@@ -38,7 +38,6 @@ const { auth } = require('../middlewares/auth.middleware');
  *       200:
  *         description: Lưu thành công
  */
-router.post('/', auth, controller.saveProgress);
 
 /**
  * @swagger
@@ -56,6 +55,8 @@ router.post('/', auth, controller.saveProgress);
  *       200:
  *         description: Lấy thành công
  */
+
+router.post('/', auth, controller.saveProgress);
 router.get('/:videoId', auth, controller.getProgress);
 
 module.exports = router;

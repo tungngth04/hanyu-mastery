@@ -1,9 +1,16 @@
 const express = require('express');
 
 const router = express.Router();
-const controller = require('../controllers/vocabulary_topic.controller');
-const validate = require('../validations/vocabulary_topic.validate');
+const controller = require('../controllers/vocabularyTopic.controller');
+const validate = require('../validations/vocabularyTopic.validate');
 const middleware = require('../middlewares/validate.middleware');
+
+/**
+ * @swagger
+ * tags:
+ *   name: Vocabulary Topic
+ *   description: Quản lý tiêu đề vocabulary
+ */
 
 /**
  * @swagger

@@ -9,7 +9,7 @@ const upload = require('../middlewares/uploadVideo.middlewares');
  * @swagger
  * tags:
  *   name: Video
- *   description: API quản lý video (YouTube + S3)
+ *   description: Quản lý video (YouTube + S3)
  */
 
 /**
@@ -87,7 +87,7 @@ const upload = require('../middlewares/uploadVideo.middlewares');
  *                 example: 2
  *               thumbnail:
  *                 type: string
- *                 example: "https://..."
+ *                 example: "https: ..."
  *     responses:
  *       201:
  *         description: Upload thành công

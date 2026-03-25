@@ -2,46 +2,41 @@ const catchAsync = require('../utils/catchAsync');
 const { status: httpStatus } = require('http-status');
 const VideoNote = require('../models/videoNote.model');
 
-/**
- * Tạo note
- */
 const createNote = catchAsync(async (req, res) => {
+  const { videoId, time, content } = req.body;
+
   const note = await VideoNote.create({
-    ...req.body,
     userId: req.user._id,
+    videoId,
+    time,
+    content,
   });
 
   res.status(httpStatus.CREATED).json({
-    code: 201,
+    code: httpStatus.CREATED,
     message: 'Tạo note thành công',
     data: note,
   });
 });
 
-/**
- * Lấy danh sách note
- */
 const getNotes = catchAsync(async (req, res) => {
   const notes = await VideoNote.find({
     videoId: req.params.videoId,
     userId: req.user._id,
   }).sort({ time: 1 });
 
-  res.status(200).json({
-    code: 200,
+  res.status(httpStatus.OK).json({
+    code: httpStatus.OK,
     message: 'Lấy danh sách note thành công',
     data: notes,
   });
 });
 
-/**
- * Xóa note
- */
 const deleteNote = catchAsync(async (req, res) => {
   await VideoNote.findByIdAndDelete(req.params.id);
 
-  res.status(200).json({
-    code: 200,
+  res.status(httpStatus.OK).json({
+    code: httpStatus.OK,
     message: 'Xóa note thành công',
   });
 });

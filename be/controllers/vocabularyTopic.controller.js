@@ -1,5 +1,5 @@
 const catchAsync = require('../utils/catchAsync');
-const VocabularyTopic = require('../models/vocabulary_topic.model');
+const VocabularyTopic = require('../models/vocabularyTopic.model');
 const { status: httpStatus } = require('http-status');
 
 const getAllTopic = catchAsync(async (req, res) => {

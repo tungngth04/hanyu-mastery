@@ -8,10 +8,17 @@ const middleware = require('../middlewares/validate.middleware');
 
 /**
  * @swagger
+ * tags:
+ *   name: Users
+ *   description: Thông tin người dùng
+ */
+
+/**
+ * @swagger
  * /users/notification:
  *   patch:
  *     summary: Cập nhật trạng thái thông báo của người dùng
- *     tags: [User]
+ *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -54,7 +61,6 @@ const middleware = require('../middlewares/validate.middleware');
  *       401:
  *         description: Không có quyền truy cập (chưa đăng nhập)
  */
-router.patch('/notification', auth, controller.updateNotification);
 
 /**
  * @swagger
@@ -84,7 +90,6 @@ router.patch('/notification', auth, controller.updateNotification);
  *       200:
  *         description: Cập nhật thành công
  */
-router.patch('/profile', auth, controller.updateProfile);
 
 /**
  * @swagger
@@ -130,6 +135,9 @@ router.patch('/profile', auth, controller.updateProfile);
  *       401:
  *         description: Chưa đăng nhập
  */
+
+router.patch('/notification', auth, controller.updateNotification);
+router.patch('/profile', auth, controller.updateProfile);
 router.patch('/change-password', auth, middleware(validate.changePassword), controller.changePassword);
 
 module.exports = router;

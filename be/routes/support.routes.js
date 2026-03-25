@@ -7,6 +7,13 @@ const middleware = require('../middlewares/validate.middleware');
 
 /**
  * @swagger
+ * tags:
+ *   name: Support
+ *   description: Quản lý support
+ */
+
+/**
+ * @swagger
  * /supports/create-support:
  *   post:
  *     summary: Gửi yêu cầu hỗ trợ
@@ -39,6 +46,7 @@ const middleware = require('../middlewares/validate.middleware');
  *       201:
  *         description: Gửi yêu cầu hỗ trợ thành công
  */
+
 router.post('/create-support', middleware(validate.createSupport), controller.createSupportRequest);
 
 module.exports = router;

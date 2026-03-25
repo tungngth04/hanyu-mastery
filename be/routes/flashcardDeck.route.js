@@ -1,17 +1,24 @@
 const express = require('express');
 
 const router = express.Router();
-const controller = require('../controllers/flashcard_deck.controller');
-const validate = require('../validations/flashcard_deck.validate');
+const controller = require('../controllers/flashcardDeck.controller');
+const validate = require('../validations/flashcardDeck.validate');
 const middleware = require('../middlewares/validate.middleware');
 const { auth } = require('../middlewares/auth.middleware');
 
 /**
  * @swagger
+ * tags:
+ *   name: Flash Card Deck
+ *   description: Quản lý nhóm flashcard
+ */
+
+/**
+ * @swagger
  * /flashcard-deck:
  *   get:
- *     summary: Lấy danh sách tất cả FlashcardDeck
- *     tags: [FlashcardDeck]
+ *     summary: Lấy danh sách tất cả Flash Card Deck
+ *     tags: [Flash Card Deck]
  *     parameters:
  *       - in: query
  *         name: pageSize
@@ -47,14 +54,13 @@ const { auth } = require('../middlewares/auth.middleware');
  *       400:
  *         description: Lỗi validation
  */
-router.get('/', auth, middleware(validate.getAllFlashcardDeck), controller.getAllFlashcardDeck);
 
 /**
  * @swagger
  * /flashcard-deck/stats:
  *   get:
  *     summary: Lấy thống kê flashcard của user
- *     tags: [FlashcardDeck]
+ *     tags: [Flash Card Deck]
  *     responses:
  *       200:
  *         description: Lấy thống kê thành công
@@ -85,5 +91,8 @@ router.get('/', auth, middleware(validate.getAllFlashcardDeck), controller.getAl
  *                       type: string
  *                       example: "5 ngày liên tục"
  */
+
+router.get('/', auth, middleware(validate.getAllFlashcardDeck), controller.getAllFlashcardDeck);
 router.get('/stats', auth, controller.getFlashcardStats);
+
 module.exports = router;

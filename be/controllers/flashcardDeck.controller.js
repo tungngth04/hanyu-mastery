@@ -1,7 +1,7 @@
 const catchAsync = require('../utils/catchAsync');
 const { status: httpStatus } = require('http-status');
-const FlashcardDeck = require('../models/flashcard_deck.model');
-const User_Deck_Progress = require('../models/user_deck_progress.model');
+const FlashcardDeck = require('../models/flashcardDeck.model');
+const User_Deck_Progress = require('../models/userDeckProgress.model');
 const { formatLastStudied } = require('../helpers/lastStudied');
 const { calculateStreak } = require('../helpers/calculateStreak');
 

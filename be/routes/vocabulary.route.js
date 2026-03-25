@@ -7,6 +7,13 @@ const middleware = require('../middlewares/validate.middleware');
 
 /**
  * @swagger
+ * tags:
+ *   name: Vocabulary
+ *   description: Quản lý vocabulary
+ */
+
+/**
+ * @swagger
  * /vocabulary:
  *   get:
  *     summary: Lấy danh sách từ vựng (có thể lọc theo topicId)
@@ -86,6 +93,7 @@ const middleware = require('../middlewares/validate.middleware');
  *       400:
  *         description: Lỗi validation
  */
+
 router.get('/', middleware(validate.getAllVocabulary), controller.getAllvocabulary);
 
 module.exports = router;

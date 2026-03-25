@@ -1,9 +1,16 @@
 const express = require('express');
 
 const router = express.Router();
-const controller = require('../controllers/user_deck_progress.controller');
-const validate = require('../validations/user_deck_progress.validate');
+const controller = require('../controllers/userDeckProgress.controller');
+const validate = require('../validations/userDeckProgress.validate');
 const middleware = require('../middlewares/validate.middleware');
+
+/**
+ * @swagger
+ * tags:
+ *   name: UserDeckProgress
+ *   description: Quản lý tiến độ của user
+ */
 
 /**
  * @swagger

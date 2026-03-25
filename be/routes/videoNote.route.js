@@ -39,7 +39,6 @@ const { auth } = require('../middlewares/auth.middleware');
  *       201:
  *         description: Tạo thành công
  */
-router.post('/', auth, controller.createNote);
 
 /**
  * @swagger
@@ -57,7 +56,6 @@ router.post('/', auth, controller.createNote);
  *       200:
  *         description: Lấy thành công
  */
-router.get('/:videoId', auth, controller.getNotes);
 
 /**
  * @swagger
@@ -75,6 +73,9 @@ router.get('/:videoId', auth, controller.getNotes);
  *       200:
  *         description: Xóa thành công
  */
+
+router.post('/', auth, controller.createNote);
+router.get('/:videoId', auth, controller.getNotes);
 router.delete('/:id', auth, controller.deleteNote);
 
 module.exports = router;

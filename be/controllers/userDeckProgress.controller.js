@@ -1,6 +1,6 @@
 const catchAsync = require('../utils/catchAsync');
 const { status: httpStatus } = require('http-status');
-const UserDeckProgress = require('../models/user_deck_progress.model');
+const UserDeckProgress = require('../models/userDeckProgress.model');
 
 const studyDeck = catchAsync(async (req, res) => {
   const { deckId } = req.body;

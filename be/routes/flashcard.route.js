@@ -8,10 +8,17 @@ const { auth } = require('../middlewares/auth.middleware');
 
 /**
  * @swagger
+ * tags:
+ *   name: FlashCard
+ *   description: Quản lý thẻ flashcard
+ */
+
+/**
+ * @swagger
  * /flashcard/{deckId}:
  *   get:
  *     summary: Lấy danh sách vocabulary theo deck của user
- *     tags: [Flashcard]
+ *     tags: [FlashCard]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -44,6 +51,7 @@ const { auth } = require('../middlewares/auth.middleware');
  *       401:
  *         description: Chưa đăng nhập
  */
+
 router.get('/:deckId', auth, middleware(validate.getFlashcardByDeckId), controller.getFlashcardByDeckId);
 
 module.exports = router;

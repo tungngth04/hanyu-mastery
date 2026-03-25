@@ -7,6 +7,7 @@ const VideoProgress = require('../models/videoProgress.model');
 
 const { getYoutubeId } = require('../helpers/getYoutubeId');
 const { getYoutubeInfo } = require('../helpers/getYoutubeInfo');
+const SavedVideo = require('../models/videoSave.model');
 
 const createYoutubeVideo = catchAsync(async (req, res) => {
   const { title, url, level, description } = req.body;
@@ -149,6 +150,11 @@ const getVideoDetail = catchAsync(async (req, res) => {
     userId: req.user._id,
   });
 
+  const isSaved = await SavedVideo.findOne({
+    videoId: id,
+    userId: req.user._id,
+  });
+
   res.status(200).json({
     code: 200,
     message: 'Lấy video thành công',
@@ -156,6 +162,7 @@ const getVideoDetail = catchAsync(async (req, res) => {
       video,
       notes,
       progress,
+      isSaved: !!isSaved,
     },
   });
 });

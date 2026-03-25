@@ -6,6 +6,14 @@ const validate = require('../validations/auth.validate');
 const middleware = require('../middlewares/validate.middleware');
 
 const { auth } = require('../middlewares/auth.middleware');
+
+/**
+ * @swagger
+ * tags:
+ *   name: Auth
+ *   description: Authentication APIs
+ */
+
 /**
  * @swagger
  * /auth/register:
@@ -51,7 +59,6 @@ const { auth } = require('../middlewares/auth.middleware');
  *       400:
  *         description: Lỗi validation
  */
-router.post('/register', middleware(validate.register), controller.register);
 
 /**
  * @swagger
@@ -92,7 +99,6 @@ router.post('/register', middleware(validate.register), controller.register);
  *       404:
  *         description: Email hoặc mật khẩu không đúng
  */
-router.post('/login', middleware(validate.login), controller.login);
 
 /**
  * @swagger
@@ -137,7 +143,6 @@ router.post('/login', middleware(validate.login), controller.login);
  *       401:
  *         description: Refresh token không hợp lệ hoặc hết hạn
  */
-router.post('/refresh-token', middleware(validate.refreshToken), controller.refreshToken);
 
 /**
  * @swagger
@@ -164,6 +169,10 @@ router.post('/refresh-token', middleware(validate.refreshToken), controller.refr
  *       401:
  *         description: Chưa đăng nhập hoặc token không hợp lệ
  */
+
+router.post('/register', middleware(validate.register), controller.register);
+router.post('/login', middleware(validate.login), controller.login);
+router.post('/refresh-token', middleware(validate.refreshToken), controller.refreshToken);
 router.get('/me', auth, controller.getCurrentUser);
 
 module.exports = router;
