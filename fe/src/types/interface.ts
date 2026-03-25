@@ -14,6 +14,8 @@ export interface IUser {
   role: "user" | "admin";
   status?: string;
   deleted?: boolean;
+
+  createdAt?: string;
 }
 
 export interface IVocabularyTopic {
@@ -105,4 +107,28 @@ export interface IVideo {
   code: number;
   message: string;
   data: IVideoData;
+}
+
+export interface IVideoNote {
+  _id: string;
+  userId: string;
+  videoId: string;
+  time: number;
+  content: string;
+
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IVideoProgress {
+  _id: string;
+  userId: string;
+  videoId: string;
+
+  currentTime: number;
+  duration: number;
+  isCompleted: boolean;
+
+  createdAt: string;
+  updatedAt: string;
 }

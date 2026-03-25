@@ -31,6 +31,16 @@ const apiConstant = {
     getAll: "/videos",
     getVideoById: (id: string) => `/videos/${id}`,
   },
+  videoNote: {
+    createNote: "/video-note",
+  },
+  videoProgress: {
+    saveProgress: "/video-progress",
+  },
+  videoSave: {
+    saveVideo: "/video-save/save",
+    getAllVideoSave: "/video-save",
+  },
 };
 
 export default apiConstant;

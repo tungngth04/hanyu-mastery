@@ -80,6 +80,8 @@ const ProfilePage = () => {
       console.log(error);
     }
   };
+  console.log("userInfor", userInfor);
+
   return (
     <>
       <div className="py-4 px-30">
@@ -102,8 +104,20 @@ const ProfilePage = () => {
                     <Camera size={16} />
                   </button>
                 </div>
-                <h2 className="text-xl font-bold">Học viên Hanyu</h2>
-                <p className="text-sm text-slate-600">Thành viên từ 01/2026</p>
+                <h2 className="text-xl font-bold">{userInfor?.fullName}</h2>
+                <p className="text-sm text-slate-600">
+                  Thành viên từ{" "}
+                  {userInfor?.createdAt &&
+                    (() => {
+                      const date = new Date(userInfor.createdAt);
+                      const month = String(date.getMonth() + 1).padStart(
+                        2,
+                        "0",
+                      );
+                      const year = date.getFullYear();
+                      return `${month}/${year}`;
+                    })()}
+                </p>
               </CardContent>
             </Card>
 

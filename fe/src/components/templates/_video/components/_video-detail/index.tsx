@@ -7,10 +7,13 @@ import Button from "@/src/components/atoms/button";
 import { Card, CardContent } from "@/src/components/atoms/card";
 import { useAppDispatch } from "@/src/hooks/useHookReducers";
 import useNotification from "@/src/hooks/useNotification";
-import { getVideoById } from "@/src/services/video/inedx";
-import { IVideoItem } from "@/src/types/interface";
+import { getVideoById } from "@/src/services/video";
+import { IVideoItem, IVideoNote, IVideoProgress } from "@/src/types/interface";
 import { formatTimeAgo } from "@/src/helpers/format-time";
 import YouTube from "react-youtube";
+import { updateProgress } from "@/src/services/video/video_progress";
+import { createNote } from "@/src/services/video/video_note";
+import { saveVideo } from "@/src/services/video/video_save";
 
 const VideoDetail = () => {
   const params = useParams();
@@ -18,11 +21,19 @@ const VideoDetail = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { notify } = useNotification();
-  const [comment, setComment] = useState("");
+
   const [video, setVideo] = useState<IVideoItem>();
-  const [notes, setNotes] = useState([]);
-  const [progress, setProgress] = useState(null);
-  const playerRef = useRef(null);
+  const [notes, setNotes] = useState<IVideoNote[]>([]);
+  const [progress, setProgress] = useState<IVideoProgress>();
+  const [noteContent, setNoteContent] = useState("");
+  const [currentTime, setCurrentTime] = useState(0);
+  const [showNote, setShowNote] = useState(true);
+  const [videoSave, setVideoSave] = useState(false);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const playerRef = useRef<any>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
   useEffect(() => {
     const fetchVideo = async () => {
       try {
@@ -31,19 +42,125 @@ const VideoDetail = () => {
         setVideo(result.video);
         setNotes(result.notes);
         setProgress(result.progress);
+        setVideoSave(result.isSaved);
+        if (result) {
+          notify("success", "Lấy dữ liệu thành công");
+        }
       } catch (err) {
         console.log(err);
+        notify("error", "Lấy dữ liệu thất bại");
       }
     };
 
     if (id) fetchVideo();
   }, [id]);
-  console.log("ádasdasd", video);
 
   const formatViews = (views: number) => {
     if (views >= 1_000_000) return (views / 1_000_000).toFixed(1) + "M";
     if (views >= 1_000) return (views / 1_000).toFixed(1) + "K";
     return views.toString();
+  };
+
+  // lấy thời gian hiện tại
+  const getCurrentTime = () => {
+    if (video?.type === "youtube") {
+      return playerRef.current?.getCurrentTime() || 0;
+    }
+    return videoRef.current?.currentTime || 0;
+  };
+
+  // cập nhật thời gian sau mỗi 50s
+  useEffect(() => {
+    if (!video) return;
+
+    const interval = setInterval(() => {
+      const time = getCurrentTime();
+      if (time < 1) return;
+
+      dispatch(updateProgress({ videoId: id, currentTime: time }));
+    }, 50000);
+
+    return () => clearInterval(interval);
+  }, [video]);
+
+  useEffect(() => {
+    if (!video) return;
+
+    const interval = setInterval(() => {
+      const time = getCurrentTime();
+      setCurrentTime(time);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [video]);
+
+  // load video tới thời điểm đã lưu
+  useEffect(() => {
+    if (!progress || !video) return;
+
+    const time = progress.currentTime;
+
+    setTimeout(() => {
+      if (video.type === "youtube") {
+        playerRef.current?.seekTo(time, true);
+      } else {
+        if (videoRef.current) videoRef.current.currentTime = time;
+      }
+    }, 1000);
+  }, [progress, video]);
+
+  // nhảy tới 1 thời điểm cụ thể
+  const seekTo = (time: number) => {
+    if (video?.type === "youtube") {
+      playerRef.current?.seekTo(time, true);
+    } else {
+      if (videoRef.current) videoRef.current.currentTime = time;
+    }
+  };
+
+  const handleAddNote = async () => {
+    const time = getCurrentTime();
+
+    if (!noteContent) return;
+
+    const res = await dispatch(
+      createNote({
+        videoId: id,
+        time,
+        content: noteContent,
+      }),
+    ).unwrap();
+
+    setNotes((prev) => [...prev, res]);
+    setNoteContent("");
+  };
+
+  const formatTime = (time: number | string) => {
+    const totalSeconds = Math.floor(Number(time));
+
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    const mm = String(minutes).padStart(2, "0");
+    const ss = String(seconds).padStart(2, "0");
+
+    return `${mm}:${ss}`;
+  };
+
+  const handleSaveVideo = async () => {
+    try {
+      const res = await dispatch(saveVideo({ videoId: id })).unwrap();
+
+      setVideoSave(res.saved);
+
+      if (res.saved) {
+        notify("success", "Lưu video thành công");
+      } else {
+        notify("success", "Bỏ lưu video thành công");
+      }
+    } catch (error) {
+      notify("error", "Có lỗi xảy ra");
+    }
   };
 
   const comments = [
@@ -97,12 +214,16 @@ const VideoDetail = () => {
                   width: "100%",
                   height: "500",
                 }}
-                onReady={(event) => {
-                  playerRef.current = event.target;
+                onReady={(e) => {
+                  playerRef.current = e.target;
+                  if (progress?.currentTime) {
+                    e.target.seekTo(progress.currentTime, true);
+                  }
                 }}
               />
             ) : (
               <video
+                ref={videoRef}
                 className="w-full h-125 object-cover"
                 src={video?.videoUrl}
                 controls
@@ -112,9 +233,12 @@ const VideoDetail = () => {
 
           <div className="flex justify-between">
             <div></div>
-            <button className="flex justify-center items-center gap-2  border rounded-2xl px-4 py-1.5 text-sm hover:bg-slate-100 cursor-pointer">
+            <button
+              className={`flex justify-center items-center gap-2  border rounded-2xl px-4 py-1.5 text-sm hover:bg-slate-100 cursor-pointer ${videoSave ? "bg-amber-300 border-amber-300 hover:bg-amber-400!" : ""}`}
+              onClick={handleSaveVideo}
+            >
               <Bookmark size={16} />
-              Lưu video
+              {videoSave ? "Hủy lưu video" : "Lưu video"}
             </button>
           </div>
 
@@ -210,47 +334,59 @@ const VideoDetail = () => {
           </Card>
         </div>
 
-        <div className="w-full xl:w-100 shrink-0 space-y-6">
+        <div className="w-full xl:w-80 shrink-0 space-y-6">
           <div className="flex justify-between items-center">
             <h3 className="font-bold text-2xl">📝 Ghi chú của tôi</h3>
-            <button className="text-sm border rounded-full px-3 py-1 cursor-pointer">
-              Ẩn
+            <button
+              className="text-sm border rounded-full px-3 py-1 cursor-pointer"
+              onClick={() => setShowNote(!showNote)}
+            >
+              {showNote ? "Ẩn" : "Hiện"}
             </button>
           </div>
 
           <Card>
             <CardContent className="space-y-4">
               <p className="text-sm text-slate-500 mb-1 font-bold">
-                GHI CHÚ TẠI 0:00
+                GHI CHÚ TẠI {formatTime(currentTime)}
               </p>
 
               <textarea
                 className="w-full h-20 border border-slate-200 rounded-xl px-4 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-primary"
                 placeholder="Ghi chú của bạn..."
+                value={noteContent}
+                onChange={(e) => setNoteContent(e.target.value)}
               />
 
-              <Button className="flex w-full items-center justify-center gap-2 font-black text-base rounded-full!">
+              <Button
+                className="flex w-full items-center justify-center gap-2 font-black text-base rounded-full!"
+                onClick={handleAddNote}
+              >
                 <Plus size={16} />
                 Thêm ghi chú
               </Button>
             </CardContent>
           </Card>
 
-          {[1, 2, 3].map((item, index) => (
-            <Card key={index}>
-              <CardContent>
-                <div className="space-y-2">
-                  <p className="text-red-500 text-sm font-bold flex items-center gap-1">
-                    <Clock size={14} /> 00:15
-                  </p>
-                  <p className="font-semibold">Thanh 1 vs Thanh 2</p>
-                  <p className="text-xs text-slate-500">
-                    Thanh 1 cao ngang, thanh 2 lên cao
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {showNote && (
+            <div className="max-h-100 overflow-y-auto space-y-4 pr-2 ">
+              {notes.map((item, index) => (
+                <Card key={index} className="cursor-pointer">
+                  <CardContent>
+                    <div
+                      className="space-y-2"
+                      onClick={() => seekTo(item.time)}
+                    >
+                      <p className="text-red-500 text-sm font-bold flex items-center gap-1">
+                        <Clock size={14} /> {formatTime(item.time)}
+                      </p>
+                      <p className="font-semibold">{item.content}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -13,7 +13,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/src/hooks/useHookReducers";
 import useNotification from "@/src/hooks/useNotification";
-import { getAllVideo } from "@/src/services/video/inedx";
+import { getAllVideo } from "@/src/services/video";
 import { IVideoItem } from "@/src/types/interface";
 import { Pagination } from "antd";
 import VideoItem from "./components/_video_item";
@@ -30,6 +30,7 @@ const VideoPage = () => {
   const [search, setSearch] = useState("");
   const [activeLevel, setActiveLevel] = useState("");
   const [videos, setVideos] = useState<IVideoItem[]>([]);
+
   useEffect(() => {
     let isMounted = true;
 

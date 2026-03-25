@@ -1,14 +1,16 @@
 import { useState } from "react";
 import Image from "next/image";
-import { CirclePlay } from "lucide-react";
+import { CirclePlay, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { IVideoItem } from "@/src/types/interface";
+import Button from "@/src/components/atoms/button";
 
 interface VideoItemProps {
   video: IVideoItem;
+  footer?: boolean;
 }
 
-const VideoItem = ({ video }: VideoItemProps) => {
+const VideoItem = ({ video, footer }: VideoItemProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const router = useRouter();
 
@@ -20,8 +22,8 @@ const VideoItem = ({ video }: VideoItemProps) => {
   };
   return (
     <div
-      className="w-full cursor-pointer group hover:bg-slate-300 p-4 rounded-2xl"
-      onClick={() => router.push(`/video/${video._id}`)}
+      className={`w-full group hover:bg-slate-300 p-4 rounded-2xl ${!footer ? "cursor-pointer" : ""}`}
+      onClick={!footer ? () => router.push(`/video/${video._id}`) : undefined}
     >
       <div className="relative aspect-video rounded-xl overflow-hidden mb-3">
         {video.type === "youtube" ? (
@@ -89,6 +91,20 @@ const VideoItem = ({ video }: VideoItemProps) => {
           </p>
         </div>
       </div>
+
+      {footer && (
+        <div className="flex gap-2 pt-2">
+          <Button
+            className="flex-1 rounded-full! p-0! text-sm!"
+            onClick={() => router.push(`/video/${video._id}`)}
+          >
+            Xem tiếp
+          </Button>
+          <button className="w-12 h-8 border border-red-400 text-red-500 rounded-full flex items-center justify-center hover:bg-red-50 cursor-pointer">
+            <Trash2 size={16} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

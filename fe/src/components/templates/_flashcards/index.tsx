@@ -250,10 +250,10 @@ function FlashcardsPage() {
                 </div>
                 <div className="pt-30 space-y-4">
                   <div className="flex items-center gap-4">
-                    <span className="text-sm border border-black px-2 py-0.5 rounded-full font-medium">
+                    <span className="text-sm border border-black px-2 py-0.5 rounded-full font-medium shrink-0">
                       {item.level}
                     </span>
-                    <span className="text-sm text-slate-500 font-medium">
+                    <span className="text-sm text-slate-500 font-medium line-clamp-1">
                       {item.topic}
                     </span>
                   </div>
