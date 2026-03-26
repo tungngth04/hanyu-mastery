@@ -162,7 +162,22 @@ class Request {
     return this.axios.put(url, data, config);
   }
 
-  patch(url: string, data: object, config?: AxiosRequestConfig) {
+  patch(
+    url: string,
+    data: object,
+    isLoad?: boolean,
+    config?: AxiosRequestConfig,
+  ) {
+    if (isLoad) {
+      return this.axios.patch(url, this.buildFormData(data), {
+        ...config,
+        headers: {
+          ...(config?.headers || {}),
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    }
+
     return this.axios.patch(url, data, config);
   }
 

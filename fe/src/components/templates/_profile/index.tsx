@@ -12,7 +12,7 @@ import {
   TrendingUp,
   User,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Card, CardContent } from "../../atoms/card";
 import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/src/hooks/useHookReducers";
@@ -23,7 +23,7 @@ import {
   updateNotification,
   updateProfile,
 } from "@/src/services/users";
-import { Field, Form, Formik } from "formik";
+import { Field, Form, Formik, FormikProps } from "formik";
 import { changePasswordValidate, profileValidate } from "@/src/types/validates";
 
 const ProfilePage = () => {
@@ -36,6 +36,11 @@ const ProfilePage = () => {
 
   const dispatch = useAppDispatch();
   const { notify } = useNotification();
+
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const formikRef = useRef<any>(null);
 
   const stats = [
     { label: "Trình độ", value: "HSK 3", icon: Award, color: "text-amber-500" },
@@ -80,8 +85,19 @@ const ProfilePage = () => {
       console.log(error);
     }
   };
-  console.log("userInfor", userInfor);
 
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setFile(null);
+    setPreview(null);
+    formikRef.current?.resetForm();
+  };
+
+  const avatar =
+    userInfor?.avatar && userInfor.avatar !== "null"
+      ? userInfor.avatar
+      : "https://i.pravatar.cc/100";
+      
   return (
     <>
       <div className="py-4 px-30">
@@ -91,7 +107,7 @@ const ProfilePage = () => {
               <CardContent className="p-6 text-center space-y-4">
                 <div className="relative inline-block">
                   <Image
-                    src="https://i.pravatar.cc/100?u=1"
+                    src={avatar}
                     alt="avatar"
                     width={40}
                     height={40}
@@ -252,10 +268,11 @@ const ProfilePage = () => {
 
       <DialogComponent
         open={modalOpen}
-        onCancel={() => setModalOpen(false)}
+        onCancel={handleCloseModal}
         submitFormId="profileForm"
       >
         <Formik
+          innerRef={formikRef}
           initialValues={
             isEditing
               ? {
@@ -276,7 +293,12 @@ const ProfilePage = () => {
           onSubmit={async (values) => {
             try {
               if (!isEditing) {
-                const result = await dispatch(updateProfile(values)).unwrap();
+                const result = await dispatch(
+                  updateProfile({
+                    ...values,
+                    avatar: file,
+                  }),
+                ).unwrap();
 
                 notify("success", "Cập nhật hồ sơ thành công");
               } else {
@@ -308,23 +330,43 @@ const ProfilePage = () => {
                     ? "Đổi mật khẩu tài khoản của bạn tại đây."
                     : "Cập nhật thông tin cá nhân của bạn tại đây."}
                 </p>
-
-                {!isEditing && (
-                  <div className="relative inline-block mt-4">
-                    <Image
-                      src="https://i.pravatar.cc/100?u=1"
-                      alt="avatar"
-                      width={80}
-                      height={80}
-                      className="rounded-full h-28 w-28 mx-auto"
-                    />
-                  </div>
-                )}
               </div>
 
               <div className="space-y-4 mt-6">
                 {!isEditing && (
                   <>
+                    <div className="text-center mb-4">
+                      <div className="relative inline-block">
+                        <Image
+                          src={preview || avatar}
+                          alt="avatar"
+                          width={100}
+                          height={100}
+                          className="rounded-full h-28 w-28 object-cover"
+                        />
+
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          id="avatarUpload"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) {
+                              setFile(f);
+                              setPreview(URL.createObjectURL(f));
+                            }
+                          }}
+                        />
+
+                        <label
+                          htmlFor="avatarUpload"
+                          className="absolute bottom-0 right-0 p-2 bg-primary text-white rounded-full cursor-pointer"
+                        >
+                          <Camera size={16} />
+                        </label>
+                      </div>
+                    </div>
                     <div className="space-y-2">
                       <label
                         htmlFor="fullName"

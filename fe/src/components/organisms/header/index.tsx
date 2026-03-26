@@ -21,7 +21,10 @@ const Header = () => {
     router.push("/");
     notify("success", "Đăng xuất thành công");
   };
-
+  const avatar =
+    userInfor?.avatar && userInfor.avatar !== "null"
+      ? userInfor.avatar
+      : "https://i.pravatar.cc/100";
   return (
     <header className="flex items-center px-6 h-16 bg-white/80 shadow-md sticky top-0 z-50 border-b border-slate-200 backdrop-blur-md">
       <div className="relative flex-1 min-w-0 mr-2 ">
@@ -40,7 +43,7 @@ const Header = () => {
         </div>
         <div className="relative">
           <Image
-            src="https://i.pravatar.cc/100?u=1"
+            src={avatar}
             alt="avatar"
             width={40}
             height={40}

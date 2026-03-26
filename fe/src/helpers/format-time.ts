@@ -18,6 +18,9 @@ export const formatTimeAgo = (dateString?: string) => {
   if (days > 0) return `${days} ngày trước`;
   if (hours > 0) return `${hours} giờ trước`;
   if (minutes > 0) return `${minutes} phút trước`;
+  if (diff < 60) return `${diff} giây trước`;
 
   return "Vừa xong";
 };
+
+

@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
         hostname: "i.pravatar.cc",
       },
     ],
-    domains: ["img.youtube.com"],
+    domains: ["img.youtube.com", "res.cloudinary.com"],
   },
 };
 

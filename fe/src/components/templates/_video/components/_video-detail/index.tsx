@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import Button from "@/src/components/atoms/button";
 import { Card, CardContent } from "@/src/components/atoms/card";
-import { useAppDispatch } from "@/src/hooks/useHookReducers";
+import { useAppDispatch, useAppSelector } from "@/src/hooks/useHookReducers";
 import useNotification from "@/src/hooks/useNotification";
 import { getVideoById } from "@/src/services/video";
 import { IVideoItem, IVideoNote, IVideoProgress } from "@/src/types/interface";
@@ -14,6 +14,11 @@ import YouTube from "react-youtube";
 import { updateProgress } from "@/src/services/video/video_progress";
 import { createNote } from "@/src/services/video/video_note";
 import { saveVideo } from "@/src/services/video/video_save";
+import socket from "@/src/constants/socket";
+import {
+  createComment,
+  getCommentsByVideo,
+} from "@/src/services/video/video_commnent";
 
 const VideoDetail = () => {
   const params = useParams();
@@ -31,8 +36,14 @@ const VideoDetail = () => {
   const [videoSave, setVideoSave] = useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [comments, setComments] = useState<any[]>([]);
+  const [commentInput, setCommentInput] = useState("");
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const playerRef = useRef<any>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const { userInfor } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -79,17 +90,6 @@ const VideoDetail = () => {
 
       dispatch(updateProgress({ videoId: id, currentTime: time }));
     }, 50000);
-
-    return () => clearInterval(interval);
-  }, [video]);
-
-  useEffect(() => {
-    if (!video) return;
-
-    const interval = setInterval(() => {
-      const time = getCurrentTime();
-      setCurrentTime(time);
-    }, 1000);
 
     return () => clearInterval(interval);
   }, [video]);
@@ -163,35 +163,43 @@ const VideoDetail = () => {
     }
   };
 
-  const comments = [
-    {
-      id: 1,
-      name: "Nguyễn Thu Thủy",
-      avatar: "https://i.pravatar.cc/40?img=1",
-      time: "2 giờ trước",
-      content:
-        "Cảm ơn cô giáo! Phần này giải thích rất rõ. Tôi hiểu hơn về thanh điệu rồi.",
-      likes: 12,
-    },
-    {
-      id: 2,
-      name: "Trần Minh Hoàng",
-      avatar: "https://i.pravatar.cc/40?img=2",
-      time: "5 giờ trước",
-      content:
-        "Bài giảng quá hay! Có thể giải thích thêm về từ '认为' không ạ?",
-      likes: 8,
-    },
-    {
-      id: 3,
-      name: "Lê Mỹ Linh",
-      avatar: "https://i.pravatar.cc/40?img=3",
-      time: "1 ngày trước",
-      content:
-        "Tôi đã luyện tập theo hướng dẫn của cô và kết quả khá tốt. Cảm ơn!",
-      likes: 24,
-    },
-  ];
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchComments = async () => {
+      const res = await dispatch(getCommentsByVideo(id)).unwrap();
+      setComments(res);
+    };
+
+    fetchComments();
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+
+    socket.emit("join_video", id);
+
+    socket.on("new_comment", (comment) => {
+      setComments((prev) => [comment, ...prev]);
+    });
+
+    return () => {
+      socket.off("new_comment");
+    };
+  }, [id]);
+
+  const handleSendComment = async () => {
+    if (!commentInput.trim()) return;
+
+    await dispatch(
+      createComment({
+        videoId: id,
+        content: commentInput,
+      }),
+    ).unwrap();
+
+    setCommentInput("");
+  };
 
   return (
     <div className="p-10 flex flex-col gap-10">
@@ -218,6 +226,13 @@ const VideoDetail = () => {
                   playerRef.current = e.target;
                   if (progress?.currentTime) {
                     e.target.seekTo(progress.currentTime, true);
+                  }
+                }}
+                onStateChange={(e) => {
+                  // 2 = pause (YouTube PlayerState.PAUSED)
+                  if (e.data === 2) {
+                    const time = e.target.getCurrentTime();
+                    setCurrentTime(time);
                   }
                 }}
               />
@@ -269,12 +284,12 @@ const VideoDetail = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center gap-2 text-xl font-bold">
                 <MessageCircle size={22} />
-                Bình luận (3)
+                Bình luận ({comments.length})
               </div>
 
               <div className="flex gap-3 items-start w-full">
                 <Image
-                  src="https://i.pravatar.cc/40"
+                  src={userInfor?.avatar || "https://i.pravatar.cc/40"}
                   alt="avatar"
                   width={40}
                   height={40}
@@ -283,6 +298,8 @@ const VideoDetail = () => {
 
                 <div className="flex-1 space-y-3">
                   <input
+                    value={commentInput}
+                    onChange={(e) => setCommentInput(e.target.value)}
                     placeholder="Viết bình luận..."
                     className="w-full border border-slate-200  rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary shadow-md"
                   />
@@ -291,18 +308,21 @@ const VideoDetail = () => {
                       Hủy
                     </button>
 
-                    <button className="bg-red-500 text-white rounded-full px-4 py-1.5 text-sm hover:bg-red-600 cursor-pointer">
+                    <button
+                      className="bg-red-500 text-white rounded-full px-4 py-1.5 text-sm hover:bg-red-600 cursor-pointer"
+                      onClick={handleSendComment}
+                    >
                       Gửi
                     </button>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-6 max-h-100 overflow-y-auto pr-2">
                 {comments.map((item, index) => (
                   <div key={index} className="flex gap-3 items-start">
                     <Image
-                      src={item.avatar}
+                      src={item.userId.avatar || "https://i.pravatar.cc/40"}
                       alt={item.name}
                       width={40}
                       height={40}
@@ -310,22 +330,14 @@ const VideoDetail = () => {
                     />
                     <div className="flex-1 space-y-1">
                       <div className="flex gap-4 items-center">
-                        <p className="font-bold text-lg">{item.name}</p>
+                        <p className="font-bold text-lg">
+                          {item.userId.fullName}
+                        </p>
                         <span className="text-slate-500 text-sm">
-                          {item.time}
+                          {formatTimeAgo(item.createdAt)}
                         </span>
                       </div>
                       <p className="text-lg text-slate-500">{item.content}</p>
-                      <div className="flex items-center gap-8 mt-4">
-                        <div className="flex justify-center items-center gap-1 text-slate-500 ">
-                          <ThumbsUp size={16} />
-                          {item.likes}
-                        </div>
-
-                        <button className="hover:text-blue-500 items-center text-slate-500">
-                          Trả lời
-                        </button>
-                      </div>
                     </div>
                   </div>
                 ))}

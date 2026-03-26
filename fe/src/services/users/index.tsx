@@ -25,6 +25,7 @@ export const updateProfile = createAsyncThunk(
       const response = await RequestMethod.patch(
         apiConstant.users.updateProfile,
         values,
+        true,
       );
 
       return response.data.data.user;
