@@ -7,11 +7,16 @@ const { prefixPath } = require('./constants/index');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 
+const http = require('http');
+const { initSocket } = require('./config/socket');
+
 database.connect();
 
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3002;
+// tạo server từ express
+const server = http.createServer(app);
 
 app.use(cors());
 // parse json body
@@ -22,6 +27,8 @@ app.use(express.static('public'));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(prefixPath, apiRoute);
+
+initSocket(server);
 
 const sendReminder = require('./helpers/sendReminder');
 
@@ -50,6 +57,10 @@ app.use((err, req, res) => {
   });
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+server.listen(port, () => {
+  console.log(`Server running on ${port}`);
 });
+
+// app.listen(port, () => {
+//   console.log(`Example app listening on port ${port}`);
+// });

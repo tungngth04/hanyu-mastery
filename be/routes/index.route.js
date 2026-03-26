@@ -39,6 +39,10 @@ const listRoutesApi = [
     route: require('./videoNote.route'),
   },
   { path: '/video-save', route: require('./videoSave.route') },
+  {
+    path: '/video-comment',
+    route: require('./videoComment.route'),
+  },
 ];
 
 listRoutesApi.forEach((route) => {

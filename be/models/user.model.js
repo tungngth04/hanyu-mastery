@@ -22,6 +22,12 @@ const userSchema = new mongoose.Schema(
         return avatars[randomIndex];
       },
     },
+
+    avatarPublicId: {
+      type: String,
+      default: '',
+    },
+
     learningGoal: String,
 
     // learning

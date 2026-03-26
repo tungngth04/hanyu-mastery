@@ -2,6 +2,7 @@ const User = require('../models/user.model');
 const catchAsync = require('../utils/catchAsync');
 const ApiError = require('../utils/ApiError');
 const { status: httpStatus } = require('http-status');
+const cloudinary = require('../config/cloudinary');
 
 const updateNotification = catchAsync(async (req, res) => {
   const { notification } = req.body;
@@ -20,11 +21,25 @@ const updateNotification = catchAsync(async (req, res) => {
 });
 
 const updateProfile = catchAsync(async (req, res) => {
-  const { fullName, email, learningGoal } = req.body;
+  const { fullName, email, learningGoal, avatar, avatarPublicId } = req.body;
 
-  const user = await User.findByIdAndUpdate(req.user._id, { fullName, email, learningGoal }, { new: true });
+  const user = await User.findById(req.user._id);
 
-  const userObj = user.toObject();
+  if (avatar && user.avatarPublicId) {
+    await cloudinary.uploader.destroy(user.avatarPublicId);
+  }
+
+  const updateData = {
+    fullName,
+    email,
+    learningGoal,
+    ...(avatar && { avatar }),
+    ...(avatarPublicId && { avatarPublicId }),
+  };
+
+  const updatedUser = await User.findByIdAndUpdate(req.user._id, updateData, { new: true });
+
+  const userObj = updatedUser.toObject();
   delete userObj.password;
 
   res.status(httpStatus.OK).json({

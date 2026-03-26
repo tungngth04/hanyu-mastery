@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 
 const { auth } = require('../middlewares/auth.middleware');
 const controller = require('../controllers/user.controllers');
 const validate = require('../validations/user.validate');
 const middleware = require('../middlewares/validate.middleware');
+const { uploadSingle } = require('../middlewares/uploadCloud.middlewares');
+const upload = multer();
 
 /**
  * @swagger
@@ -66,14 +69,14 @@ const middleware = require('../middlewares/validate.middleware');
  * @swagger
  * /users/profile:
  *   patch:
- *     summary: Cập nhật thông tin cá nhân
+ *     summary: Cập nhật thông tin cá nhân + avatar
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -86,6 +89,9 @@ const middleware = require('../middlewares/validate.middleware');
  *               learningGoal:
  *                 type: string
  *                 example: HSK5 trong 6 tháng
+ *               avatar:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Cập nhật thành công
@@ -137,7 +143,7 @@ const middleware = require('../middlewares/validate.middleware');
  */
 
 router.patch('/notification', auth, controller.updateNotification);
-router.patch('/profile', auth, controller.updateProfile);
+router.patch('/profile', auth, upload.single('avatar'), uploadSingle('avatars'), controller.updateProfile);
 router.patch('/change-password', auth, middleware(validate.changePassword), controller.changePassword);
 
 module.exports = router;

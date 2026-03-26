@@ -18,6 +18,6 @@ const savedVideoSchema = new mongoose.Schema(
 
 savedVideoSchema.index({ userId: 1, videoId: 1 }, { unique: true });
 
-const SavedVideo = mongoose.model('SavedVideo', savedVideoSchema, 'saved_videos');
+const SavedVideo = mongoose.model('SavedVideo', savedVideoSchema, 'video_saved');
 
 module.exports = SavedVideo;
