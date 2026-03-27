@@ -43,6 +43,10 @@ const listRoutesApi = [
     path: '/video-comment',
     route: require('./videoComment.route'),
   },
+  {
+    path: '/pronunciation',
+    route: require('./pronunciation.route'),
+  },
 ];
 
 listRoutesApi.forEach((route) => {
