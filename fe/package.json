@@ -13,6 +13,7 @@
     "antd": "^6.3.1",
     "axios": "^1.13.6",
     "formik": "^2.4.9",
+    "hanzi-writer": "^3.7.3",
     "lucide-react": "^0.576.0",
     "next": "16.1.6",
     "react": "19.2.3",

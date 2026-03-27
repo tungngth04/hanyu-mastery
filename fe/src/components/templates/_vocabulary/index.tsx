@@ -10,6 +10,7 @@ import useNotification from "@/src/hooks/useNotification";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Pagination } from "antd";
 import ScrollContainer from "react-indiana-drag-scroll";
+import HanziAnimation from "../../atoms/hanzi-animation";
 
 const VocabularyPage = () => {
   const [activeTopic, setActiveTopic] = useState("Tất cả");
@@ -142,7 +143,7 @@ const VocabularyPage = () => {
           >
             <CardContent className="p-0 relative">
               <div className="absolute top-0 left-0 w-full flex items-center justify-between px-4 py-3 bg-slate-200 border-b border-slate-200">
-                <span className="text-xs border border-black px-2 py-[2px] rounded-full font-medium">
+                <span className="text-xs border border-black px-2 py-0.5 rounded-full font-medium">
                   HSK {item.level}
                 </span>
 
@@ -153,9 +154,9 @@ const VocabularyPage = () => {
               </div>
 
               <div className="pt-12 p-6 text-center">
-                <h3 className="text-5xl font-bold text-slate-900 mb-2 group-hover:text-primary">
-                  {item.hanzi}
-                </h3>
+                <div className="mb-2 flex justify-center items-center">
+                  <HanziAnimation hanzi={item.hanzi} />
+                </div>
 
                 <p className="text-lg text-slate-500 mb-1">{item.pinyin}</p>
 

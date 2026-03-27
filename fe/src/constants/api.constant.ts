@@ -45,6 +45,9 @@ const apiConstant = {
     create: "/video-comment",
     getByVideoId: (id: string) => `/video-comment/${id}`,
   },
+  pronunciation: {
+    upRecord: "/pronunciation",
+  },
 };
 
 export default apiConstant;

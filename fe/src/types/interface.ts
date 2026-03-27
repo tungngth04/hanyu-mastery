@@ -132,3 +132,33 @@ export interface IVideoProgress {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface IPhonemeDetail {
+  _id: string;
+  phoneme: string;
+  accuracy: number;
+}
+
+export interface IWordPhoneme {
+  _id: string;
+  word: string;
+  phonemes: IPhonemeDetail[];
+}
+
+export interface IPronunciationResult {
+  _id: string;
+  userId: string;
+  text: string;
+
+  accuracy: number;
+  fluency: number;
+  completeness: number;
+  pronunciation: number;
+
+  recognizedText: string;
+
+  phonemes: IWordPhoneme[];
+
+  createdAt: string;
+  updatedAt: string;
+}

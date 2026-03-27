@@ -133,7 +133,7 @@ class Request {
     config?: AxiosRequestConfig,
   ) {
     if (isLoad) {
-      return this.axios.post(url, this.buildFormData(data), {
+      return this.axios.post(url, data, {
         ...config,
         headers: {
           ...(config?.headers || {}),

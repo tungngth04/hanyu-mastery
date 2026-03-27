@@ -1,12 +1,22 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Card, CardContent } from "../../atoms/card";
 import { CheckCircle2, Info, Mic, Play, Volume2 } from "lucide-react";
 import Button from "../../atoms/button";
+import { useAppDispatch } from "@/src/hooks/useHookReducers";
+import { uploadPronunciation } from "@/src/services/pronunciation";
+import { IPronunciationResult } from "@/src/types/interface";
 
 const PronunciationPage = () => {
   const [level, setLevel] = useState("Luyện tập");
   const [recording, setRecording] = useState(false);
+  const dispatch = useAppDispatch();
+
+  const [resultScore, setResultScore] = useState<IPronunciationResult | null>(
+    null,
+  );
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<BlobPart[]>([]);
 
   const levels = ["Luyện tập", "Bảng Pinyin"];
   const initials = [
@@ -56,6 +66,116 @@ const PronunciationPage = () => {
       desc: "Từ cao xuống thấp (như dấu nặng)",
     },
   ];
+
+  const getScoreMeta = (score?: number) => {
+    if (!score && score !== 0) {
+      return {
+        label: "Chưa có",
+        color: "gray",
+        bg: "bg-gray-50",
+        text: "text-gray-500",
+        border: "border-gray-200",
+      };
+    }
+
+    if (score >= 90) {
+      return {
+        label: "Rất tốt",
+        color: "green",
+        bg: "bg-green-50",
+        text: "text-green-600",
+        border: "border-green-200",
+      };
+    }
+
+    if (score >= 75) {
+      return {
+        label: "Tốt",
+        color: "blue",
+        bg: "bg-blue-50",
+        text: "text-blue-600",
+        border: "border-blue-200",
+      };
+    }
+
+    if (score >= 60) {
+      return {
+        label: "Khá",
+        color: "yellow",
+        bg: "bg-yellow-50",
+        text: "text-yellow-600",
+        border: "border-yellow-200",
+      };
+    }
+
+    if (score >= 40) {
+      return {
+        label: "Yếu",
+        color: "orange",
+        bg: "bg-orange-50",
+        text: "text-orange-600",
+        border: "border-orange-200",
+      };
+    }
+
+    return {
+      label: "Kém",
+      color: "red",
+      bg: "bg-red-50",
+      text: "text-red-600",
+      border: "border-red-200",
+    };
+  };
+
+  const scoreMeta = getScoreMeta(resultScore?.pronunciation);
+
+  const colors = ["green", "orange", "red", "pink"];
+
+  const startRecording = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    const mediaRecorder = new MediaRecorder(stream);
+    mediaRecorderRef.current = mediaRecorder;
+    audioChunksRef.current = [];
+
+    mediaRecorder.ondataavailable = (e) => {
+      audioChunksRef.current.push(e.data);
+    };
+
+    mediaRecorder.onstop = async () => {
+      const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+
+      try {
+        const result = await dispatch(
+          uploadPronunciation({ audio: blob, text: "你好" }),
+        ).unwrap();
+        setResultScore(result);
+        console.log("RESULT:", result);
+      } catch (error) {
+        console.error("Upload thất bại:", error);
+      }
+    };
+
+    mediaRecorder.start();
+
+    setRecording(true);
+  };
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && recording) {
+      mediaRecorderRef.current.stop();
+      setRecording(false);
+    }
+  };
+
+  const toggleRecording = () => {
+    if (recording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+  const phonemeList = resultScore?.phonemes?.[0]?.phonemes || [];
+  console.log("ádasdas", resultScore);
   return (
     <div className="px-2 py-10 md:px-10">
       <div>
@@ -127,7 +247,7 @@ const PronunciationPage = () => {
                       ? "bg-rose-500 shadow-rose-500/30 scale-110 animate-pulse"
                       : "bg-primary shadow-primary/30 hover:scale-105"
                   }`}
-                  onClick={() => setRecording(!recording)}
+                  onClick={toggleRecording}
                 >
                   <Mic size={32} className="text-white" />
                 </Button>
@@ -159,44 +279,39 @@ const PronunciationPage = () => {
 
                 <div className="flex gap-3 items-end">
                   <span className="text-indigo-600  text-5xl font-black">
-                    85
+                    {resultScore?.pronunciation ?? "--"}
                   </span>
                   <span className="text-lg font-bold text-slate-500 mb-1">
                     /100
                   </span>
-                  <span className="mb-2 bg-green-50 text-green-500 border border-green-200 rounded-full px-2">
-                    Rất tốt
+                  <span
+                    className={`mb-2 flex items-center gap-1 px-2 py-0.5 rounded-full border ${scoreMeta.bg} ${scoreMeta.text} ${scoreMeta.border}`}
+                  >
+                    {scoreMeta.label}
                   </span>
                 </div>
 
                 <div className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <p className="text-slate-500">Độ chuẩn xác (piào)</p>
-                      <p className="text-green-600 font-bold">90%</p>
-                    </div>
-                    <div className="bg-slate-100 h-3 w-full rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-green-500 rounded-full transition-all"
-                        style={{ width: "90%" }}
-                      ></div>
-                    </div>
-                  </div>
+                  {phonemeList.map((item, index) => (
+                    <div key={index} className="space-y-2">
+                      <div className="flex justify-between">
+                        <p className="text-slate-500">
+                          Độ chuẩn xác ({item.phoneme})
+                        </p>
+                        <p className={`text-${colors[index]}-600 font-bold`}>
+                          {Math.round(item.accuracy)}%
+                        </p>
+                      </div>
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <p className="text-slate-500">Độ chuẩn xác (liang)</p>
-                      <p className="text-orange-400 font-bold">75%</p>
+                      <div className="bg-slate-100 h-3 w-full rounded-full overflow-hidden">
+                        <div
+                          className={`h-full bg-${colors[index]}-500 rounded-full transition-all`}
+                          style={{ width: `${item.accuracy}%` }}
+                        ></div>
+                      </div>
                     </div>
-                    <div className="bg-slate-100 h-3 w-full rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-orange-400 rounded-full transition-all"
-                        style={{ width: "75%" }}
-                      ></div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-
                 <div className="mt-6 p-4 bg-white/60 rounded-xl border border-indigo-100 backdrop-blur-sm">
                   <p className="text-sm text-slate-700 leading-relaxed">
                     <strong className="text-indigo-700">Mẹo AI:</strong> Âm
