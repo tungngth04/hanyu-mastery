@@ -18,6 +18,7 @@ const apiConstant = {
   },
   flashcard: {
     getByDeckId: (id: string) => `/flashcard/${id}`,
+    updateStatus: (vocabularyId: string) => `/flashcard/${vocabularyId}/status`,
   },
   users: {
     updateNotification: "/users/notification",
@@ -47,6 +48,9 @@ const apiConstant = {
   },
   pronunciation: {
     upRecord: "/pronunciation",
+  },
+  userDeckProgress: {
+    study: "/user-deck-progress/study",
   },
 };
 

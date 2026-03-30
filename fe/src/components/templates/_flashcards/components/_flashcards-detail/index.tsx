@@ -1,94 +1,68 @@
 "use client";
-import { useState } from "react";
-import { Eye, RotateCcw, ThumbsDown, ThumbsUp } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  RotateCcw,
+  ThumbsDown,
+  ThumbsUp,
+} from "lucide-react";
 import { Card, CardContent } from "@/src/components/atoms/card";
 import Button from "@/src/components/atoms/button";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { useAppDispatch } from "@/src/hooks/useHookReducers";
+import {
+  getAllFlashCardById,
+  studyFlashcardDeck,
+  updateFlashcardStatus,
+} from "@/src/services/flashCards";
+import { IVocabulary } from "@/src/types/interface";
+import useNotification from "@/src/hooks/useNotification";
 
 function FlashcardsDetail() {
   const [dataIndex, setDataIndex] = useState(0);
   const [showBack, setShowBack] = useState(false);
   const [completed, setCompleted] = useState(false);
   const router = useRouter();
+  const params = useParams();
+  const id = params.id as string;
 
-  const data = [
-    {
-      id: 1,
-      front: "环境",
-      pinyin: "huánjìng",
-      back: "Môi trường",
-      example: "保护环境 (Bǎohù huánjìng) - Bảo vệ môi trường",
-    },
-    {
-      id: 2,
-      front: "文化",
-      pinyin: "wénhuà",
-      back: "Văn hóa",
-      example: "中国文化 (Zhōngguó wénhuà) - Văn hóa Trung Quốc",
-    },
-    {
-      id: 3,
-      front: "教育",
-      pinyin: "jiàoyù",
-      back: "Giáo dục",
-      example: "教育改革 (Jiàoyù gǎigé) - Cải cách giáo dục",
-    },
-    {
-      id: 4,
-      front: "经济",
-      pinyin: "jīngjì",
-      back: "Kinh tế",
-      example: "经济发展 (Jīngjì fāzhǎn) - Phát triển kinh tế",
-    },
-    {
-      id: 5,
-      front: "科技",
-      pinyin: "kējì",
-      back: "Công nghệ",
-      example: "科技创新 (Kējì chuàngxīn) - Đổi mới công nghệ",
-    },
-    {
-      id: 6,
-      front: "健康",
-      pinyin: "jiànkāng",
-      back: "Sức khỏe",
-      example: "保持健康 (Bǎochí jiànkāng) - Giữ gìn sức khỏe",
-    },
-    {
-      id: 7,
-      front: "旅游",
-      pinyin: "lǚyóu",
-      back: "Du lịch",
-      example: "旅游景点 (Lǚyóu jǐngdiǎn) - Điểm du lịch",
-    },
-    {
-      id: 8,
-      front: "艺术",
-      pinyin: "yìshù",
-      back: "Nghệ thuật",
-      example: "艺术展览 (Yìshù zhǎnlǎn) - Triển lãm nghệ thuật",
-    },
-    {
-      id: 9,
-      front: "体育",
-      pinyin: "tǐyù",
-      back: "Thể thao",
-      example: "体育比赛 (Tǐyù bǐsài) - Trận đấu thể thao",
-    },
-    {
-      id: 10,
-      front: "社会",
-      pinyin: "shèhuì",
-      back: "Xã hội",
-      example: "社会问题 (Shèhuì wèntí) - Vấn đề xã hội",
-    },
-  ];
+  const dispatch = useAppDispatch();
+  const { notify } = useNotification();
 
-  const progressPercent = ((dataIndex + 1) / data.length) * 100;
-  const dataCard = data[dataIndex];
+  const [flashCard, setFlashCard] = useState<IVocabulary[]>([]);
+
+  useEffect(() => {
+    const fetchVideo = async () => {
+      try {
+        const result = await dispatch(getAllFlashCardById(id)).unwrap();
+
+        setFlashCard(result);
+        if (result) {
+          notify("success", "Lấy dữ liệu thành công");
+        }
+      } catch (err) {
+        console.log(err);
+        notify("error", "Lấy dữ liệu thất bại");
+      }
+    };
+
+    if (id) fetchVideo();
+  }, [id]);
+
+  const progressPercent = ((dataIndex + 1) / flashCard.length) * 100;
+  const dataCard = flashCard[dataIndex];
+
+  const handlePrev = () => {
+    if (dataIndex > 0) {
+      setDataIndex(dataIndex - 1);
+      setShowBack(false);
+    }
+  };
 
   const handleNext = () => {
-    if (dataIndex + 1 < data.length) {
+    if (dataIndex + 1 < flashCard.length) {
       setDataIndex(dataIndex + 1);
       setShowBack(false);
     } else {
@@ -101,6 +75,42 @@ function FlashcardsDetail() {
     setShowBack(false);
     setCompleted(false);
   };
+
+  const isMastered = dataCard?.status === "mastered";
+
+  const handleUpdateStatus = async (status: "new" | "mastered") => {
+    const current = flashCard[dataIndex];
+
+    try {
+      await dispatch(
+        updateFlashcardStatus({
+          vocabularyId: current._id,
+          status,
+          deckId: id,
+        }),
+      ).unwrap();
+
+      const updated = [...flashCard];
+      updated[dataIndex].status = status;
+      setFlashCard(updated);
+
+      handleNext();
+    } catch (err) {
+      notify("error", "Cập nhật thất bại");
+    }
+  };
+
+  useEffect(() => {
+    if (!id) return;
+
+    const handleStudy = async () => {
+      try {
+        await dispatch(studyFlashcardDeck(id)).unwrap();
+      } catch (err) {}
+    };
+
+    handleStudy();
+  }, [id]);
 
   return (
     <>
@@ -127,7 +137,7 @@ function FlashcardsDetail() {
               <span className="font-bold text-xl text-primary">
                 {dataIndex + 1}
               </span>
-              <span className="text-slate-500">/{data.length}</span>
+              <span className="text-slate-500">/{flashCard.length}</span>
             </div>
             <div className="h-2 w-full bg-rose-200 rounded-full overflow-hidden">
               <div
@@ -137,7 +147,7 @@ function FlashcardsDetail() {
             </div>
           </div>
 
-          <div className="flex justify-center items-center perspective mt-6">
+          <div className="flex justify-center items-center perspective mt-10 ">
             <div
               className={`relative z-10 transition-transform duration-500 preserve-3d cursor-pointer w-[90%] sm:w-125 md:w-150 lg:w-175 h-100 ${showBack ? "-rotate-y-180" : ""}`}
               onClick={() => setShowBack(!showBack)}
@@ -145,7 +155,7 @@ function FlashcardsDetail() {
               <Card className="absolute inset-0 backface-hidden border shadow-xl flex items-center justify-center h-100 w-full">
                 <CardContent className="flex items-center gap-4 flex-col">
                   <h2 className="text-9xl md:text-9xl font-bold">
-                    {dataCard.front}
+                    {dataCard?.hanzi}
                   </h2>
 
                   <div className="flex items-center justify-center gap-2">
@@ -156,21 +166,25 @@ function FlashcardsDetail() {
               </Card>
 
               <Card className="absolute inset-0 rotate-y-180 backface-hidden border shadow-xl flex items-center justify-center h-100 w-full">
-                <CardContent className="flex flex-col items-center gap-3 p-0!">
-                  <p className="text-red-500 text-4xl">{dataCard.pinyin}</p>
-                  <p className="text-5xl font-black">{dataCard.back}</p>
+                <CardContent className="flex flex-col items-center gap-3 p-10 overflow-y-auto max-h-full">
+                  <p className="text-red-500 text-4xl">{dataCard?.pinyin}</p>
+                  <p className="text-5xl font-black text-center wrap-break-word">
+                    {dataCard?.meaning}
+                  </p>
                   <div className="flex gap-4">
                     <p className="bg-blue-200 py-1 px-3 rounded-2xl text-blue-700 font-bold text-sm w-20 text-center">
                       Danh từ
                     </p>
                     <p className="bg-orange-100 py-1 px-3 rounded-2xl text-orange-400 font-bold text-sm w-20 text-center">
-                      HSK 4
+                      HSK {dataCard?.level}
                     </p>
                   </div>
                   <Card className="w-full">
-                    <CardContent>
+                    <CardContent className="w-full">
                       <p className="text-slate-700">Ví dụ:</p>
-                      <p>{dataCard.example}</p>
+                      <p className="wrap-break-word">
+                        {dataCard?.example} ({dataCard?.exampleMeaning})
+                      </p>
                     </CardContent>
                   </Card>
                 </CardContent>
@@ -178,29 +192,47 @@ function FlashcardsDetail() {
             </div>
           </div>
 
-          <div className="flex justify-center gap-6">
-            <Button
-              className="bg-white text-primary! p-0! w-38 h-18 flex flex-col items-center justify-center gap-2 hover:bg-rose-100"
-              onClick={handleNext}
-            >
-              <span>
-                <ThumbsDown />
-              </span>
-              <span>Chưa thuộc</span>
-            </Button>
-            <Button
-              className="bg-green-300!  p-0! w-38 h-18 flex flex-col items-center justify-center gap-2 shadow-green-500/20! hover:bg-green-400!"
-              onClick={handleNext}
-            >
-              <span>
-                <ThumbsUp />
-              </span>
-              <span>Đã thuộc</span>
-            </Button>
+          <div className="flex justify-center gap-6 mt-10">
+            <div className="flex items-center gap-6">
+              <button
+                onClick={handlePrev}
+                className="w-12 h-12 rounded-full border border-slate-200 text-slate-400 hover:text-primary hover:border-primary flex items-center justify-center cursor-pointer"
+              >
+                <ChevronLeft size={22} />
+              </button>
+
+              <div className="flex gap-4">
+                <Button
+                  className={`p-0! w-38 h-18 flex flex-col rounded-2xl! items-center justify-center gap-2 ${!isMastered ? "bg-red-500 text-white hover:bg-none!" : "bg-red-300 hover:bg-rose-500"}`}
+                  onClick={() => handleUpdateStatus("new")}
+                >
+                  <span>
+                    <ThumbsDown />
+                  </span>
+                  <span>Chưa thuộc</span>
+                </Button>
+                <Button
+                  className={`p-0! w-38 h-18 flex flex-col rounded-2xl! items-center justify-center gap-2 ${isMastered ? "bg-green-500! shadow-green-500/20" : "bg-green-300!  hover:bg-green-400!"}`}
+                  onClick={() => handleUpdateStatus("mastered")}
+                >
+                  <span>
+                    <ThumbsUp />
+                  </span>
+                  <span>Đã thuộc</span>
+                </Button>
+              </div>
+
+              <button
+                onClick={handleNext}
+                className="w-12 h-12 rounded-full border border-slate-200 text-slate-400 hover:text-primary hover:border-primary flex items-center justify-center cursor-pointer"
+              >
+                <ChevronRight size={22} />
+              </button>
+            </div>
           </div>
         </div>
       ) : (
-        <div className=" flex flex-col items-center justify-center h-100 w-full gap-5 mt-10">
+        <div className=" flex flex-col items-center justify-center h-150 w-full gap-5 mt-10">
           <div className="bg-green-100 rounded-full w-24 h-24 flex items-center justify-center text-green-500">
             <ThumbsUp size={32} />
           </div>
@@ -209,12 +241,23 @@ function FlashcardsDetail() {
             Bạn đã ôn tập xong bộ flashcard hôm nay.
           </p>
 
-          <button
-            onClick={handleRestart}
-            className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-full flex items-center justify-center gap-2"
-          >
-            <RotateCcw size={20} /> Học lại bộ này
-          </button>
+          <div className="flex flex-col items-center gap-3 w-full max-w-3xs">
+            <button
+              onClick={handleRestart}
+              className="w-full bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-full flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <RotateCcw size={20} />
+              Học lại bộ này
+            </button>
+
+            <button
+              onClick={() => router.push("/flashcards")}
+              className="w-full text-gray-500 hover:text-gray-700 flex items-center justify-center gap-2 border px-6 py-3 rounded-full cursor-pointer"
+            >
+              <ChevronLeft size={18} />
+              Quay về danh sách
+            </button>
+          </div>
         </div>
       )}
     </>

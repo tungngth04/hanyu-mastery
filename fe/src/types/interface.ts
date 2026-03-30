@@ -1,3 +1,4 @@
+// User
 export interface IUser {
   _id?: string;
   email: string;
@@ -18,6 +19,7 @@ export interface IUser {
   createdAt?: string;
 }
 
+// Vocabulary
 export interface IVocabularyTopic {
   _id: string;
   name: string;
@@ -34,6 +36,8 @@ export interface IVocabulary {
   level: number;
   radical: string;
   audio: string;
+
+  status?: string;
 }
 
 export interface IVocabularyResponse {
@@ -44,7 +48,7 @@ export interface IVocabularyResponse {
   totalResults: number;
 }
 
-// Interface cho từng flashcard deck
+// Flashcard deck
 export interface IFlashCardDeckItem {
   _id: string;
   title: string;
@@ -59,7 +63,6 @@ export interface IFlashCardDeckItem {
   color?: string;
 }
 
-// Interface cho response data
 export interface IFlashCardDeckData {
   flashcardDecks: IFlashCardDeckItem[];
   pageSize: number;
@@ -68,7 +71,6 @@ export interface IFlashCardDeckData {
   totalResults: number;
 }
 
-// Interface tổng response API
 export interface IFlashCardDeck {
   code: number;
   message: string;
@@ -133,6 +135,8 @@ export interface IVideoProgress {
   updatedAt: string;
 }
 
+// record
+
 export interface IPhonemeDetail {
   _id: string;
   phoneme: string;
@@ -161,4 +165,9 @@ export interface IPronunciationResult {
 
   createdAt: string;
   updatedAt: string;
+}
+
+// flash card
+export interface IFlashCardItem {
+  _id: string;
 }

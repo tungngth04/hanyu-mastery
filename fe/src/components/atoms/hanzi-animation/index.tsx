@@ -35,6 +35,8 @@ const HanziAnimation = ({ hanzi }: Props) => {
         showOutline: true,
         strokeColor: "#000",
         padding: 5,
+        strokeAnimationSpeed: 2, // 🔥 nhanh hơn (default ~1)
+        delayBetweenStrokes: 50,
       });
 
       charDiv.addEventListener("mouseenter", () => {
