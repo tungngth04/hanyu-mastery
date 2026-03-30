@@ -51,7 +51,38 @@ const { auth } = require('../middlewares/auth.middleware');
  *       401:
  *         description: Chưa đăng nhập
  */
+/**
+ * @swagger
+ * /flashcard/{vocabularyId}/status:
+ *   patch:
+ *     summary: Cập nhật trạng thái flashcard
+ *     tags: [FlashCard]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: vocabularyId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *               - deckId
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [new, mastered]
+ *               deckId:
+ *                 type: string
+ */
 
 router.get('/:deckId', auth, middleware(validate.getFlashcardByDeckId), controller.getFlashcardByDeckId);
+router.patch('/:vocabularyId/status', auth, controller.updateFlashcardStatus);
 
 module.exports = router;

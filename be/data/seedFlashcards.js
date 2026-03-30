@@ -7,7 +7,6 @@ mongoose.connect('mongodb+srv://tungnt:WRqDFlKtlbpIwY0P@ntung.cfv0v.mongodb.net/
 
 const userId = new mongoose.Types.ObjectId('69b7719d02ae9d855c75a01f');
 
-// Map deck theo level và chủ đề
 const decks = {
   1: {
     basic: '69c0e5d3b700ca4448d78596',
@@ -24,7 +23,6 @@ const decks = {
   6: { idioms: '69c0e5d3b700ca4448d785a0' },
 };
 
-// Map hanzi vào từng chủ đề (level 1)
 const hanziMap = {
   family: ['爸爸', '儿子', '家'],
   food: ['吃', '喝', '茶', '菜'],
@@ -35,38 +33,43 @@ const hanziMap = {
 
 async function seedFlashcards() {
   try {
-    console.log('Đang lấy vocabulary...');
+    console.log('🧹 Xóa flashcard cũ...');
+    await Flashcard.deleteMany({ userId }); // ✅ FIX 1
 
+    console.log('📥 Đang lấy vocabulary...');
     const vocabularies = await Vocabulary.find();
 
     const flashcards = [];
+    const uniqueSet = new Set(); // ✅ FIX 2
+
+    const addFlashcard = (deckId, vocabId, status) => {
+      const key = `${userId}-${deckId}-${vocabId}-${status}`;
+
+      if (!uniqueSet.has(key)) {
+        uniqueSet.add(key);
+        flashcards.push({
+          userId,
+          deckId,
+          vocabularyId: vocabId,
+          status,
+        });
+      }
+    };
 
     vocabularies.forEach((vocab) => {
       const levelDecks = decks[vocab.level];
       if (!levelDecks) return;
 
       const createFlashcard = (deckId) => {
-        // tạo 2 bản: new và mastered
-        flashcards.push({
-          userId,
-          deckId,
-          vocabularyId: vocab._id,
-          status: 'new',
-        });
-        flashcards.push({
-          userId,
-          deckId,
-          vocabularyId: vocab._id,
-          status: 'mastered',
-        });
+        addFlashcard(deckId, vocab._id, 'new');
       };
 
-      // flashcard cơ bản level 1
+      // level 1 basic
       if (vocab.level === 1 && levelDecks.basic) {
         createFlashcard(levelDecks.basic);
       }
 
-      // check hanzi map level 1
+      // level 1 theo topic
       if (vocab.level === 1) {
         for (const [topic, hanziList] of Object.entries(hanziMap)) {
           if (hanziList.includes(vocab.hanzi) && levelDecks[topic]) {
@@ -75,7 +78,7 @@ async function seedFlashcards() {
         }
       }
 
-      // Level > 1, gán thẳng vào deck
+      // level > 1
       if (vocab.level > 1) {
         for (const deckName in levelDecks) {
           createFlashcard(levelDecks[deckName]);
@@ -87,7 +90,7 @@ async function seedFlashcards() {
       await Flashcard.insertMany(flashcards);
     }
 
-    console.log(`Đã tạo ${flashcards.length} flashcards (bao gồm new + mastered)`);
+    console.log(`✅ Đã tạo ${flashcards.length} flashcards (không duplicate)`);
     process.exit();
   } catch (error) {
     console.error(error);

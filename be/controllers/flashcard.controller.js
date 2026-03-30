@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const catchAsync = require('../utils/catchAsync');
 const Flashcard = require('../models/flashcard.model');
 const { status: httpStatus } = require('http-status');
+const { updateLastStudied } = require('./userDeckProgress.controller');
 
 const getFlashcardByDeckId = catchAsync(async (req, res) => {
   const { deckId } = req.params;
@@ -31,14 +32,15 @@ const getFlashcardByDeckId = catchAsync(async (req, res) => {
     },
 
     {
-      $project: {
+      $group: {
         _id: '$vocabulary._id',
-        hanzi: '$vocabulary.hanzi',
-        pinyin: '$vocabulary.pinyin',
-        meaning: '$vocabulary.meaning',
-        example: '$vocabulary.example',
-        exampleMeaning: '$vocabulary.exampleMeaning',
-        status: '$status',
+        hanzi: { $first: '$vocabulary.hanzi' },
+        pinyin: { $first: '$vocabulary.pinyin' },
+        meaning: { $first: '$vocabulary.meaning' },
+        example: { $first: '$vocabulary.example' },
+        exampleMeaning: { $first: '$vocabulary.exampleMeaning' },
+        level: { $first: '$vocabulary.level' },
+        status: { $last: '$status' },
       },
     },
   ]);
@@ -50,4 +52,27 @@ const getFlashcardByDeckId = catchAsync(async (req, res) => {
   });
 });
 
-module.exports = { getFlashcardByDeckId };
+const updateFlashcardStatus = catchAsync(async (req, res) => {
+  const { vocabularyId } = req.params;
+  const { status, deckId } = req.body;
+  const userId = req.user._id;
+
+  const updated = await Flashcard.findOneAndUpdate(
+    {
+      vocabularyId: new mongoose.Types.ObjectId(vocabularyId),
+      userId,
+      deckId: new mongoose.Types.ObjectId(deckId),
+    },
+    { status },
+    { new: true },
+  );
+  await updateLastStudied(userId, deckId);
+
+  res.json({
+    code: 200,
+    message: 'Cập nhật thành công',
+    data: updated,
+  });
+});
+
+module.exports = { getFlashcardByDeckId, updateFlashcardStatus };
