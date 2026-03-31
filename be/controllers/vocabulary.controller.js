@@ -2,6 +2,7 @@ const catchAsync = require('../utils/catchAsync');
 const { status: httpStatus } = require('http-status');
 const Vocabulary = require('../models/vocabulary.model');
 const ApiError = require('../utils/ApiError');
+const VocabularyDaily = require('../models/vocabularyDaily.model');
 
 const getAllvocabulary = catchAsync(async (req, res) => {
   const { pageSize = 10, page = 1, topicId } = req.query;
@@ -35,4 +36,22 @@ const getAllvocabulary = catchAsync(async (req, res) => {
   });
 });
 
-module.exports = { getAllvocabulary };
+const getDailyVocabulary = catchAsync(async (req, res) => {
+  const today = new Date().toLocaleDateString('en-CA', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+  });
+
+  const daily = await VocabularyDaily.findOne({ date: today }).populate('vocabularies');
+
+  if (!daily) {
+    throw new ApiError(404, 'Chưa có từ vựng hôm nay');
+  }
+
+  res.json({
+    code: 200,
+    message: 'Lấy từ vựng hôm nay thành công',
+    data: daily.vocabularies,
+  });
+});
+
+module.exports = { getAllvocabulary, getDailyVocabulary };

@@ -1,0 +1,27 @@
+const initialSoundMap = {
+  b: 'bo',
+  p: 'po',
+  m: 'mo',
+  f: 'fo',
+  d: 'de',
+  t: 'te',
+  n: 'ne',
+  l: 'le',
+  g: 'ge',
+  k: 'ke',
+  h: 'he',
+  j: 'ji',
+  q: 'qi',
+  x: 'xi',
+  zh: 'zhi',
+  ch: 'chi',
+  sh: 'shi',
+  r: 'ri',
+  z: 'zi',
+  c: 'ci',
+  s: 'si',
+  y: 'yi',
+  w: 'wu',
+};
+
+module.exports = { initialSoundMap };

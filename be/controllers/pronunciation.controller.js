@@ -13,8 +13,6 @@ const speechRegion = process.env.SPEECH_REGION;
 
 const assessPronunciation = catchAsync(async (req, res) => {
   let tempInput, tempWav;
-  console.log('FILE:', req.file);
-  console.log('BODY:', req.body);
   try {
     const referenceText = req.body.text;
     const userId = req.user._id;

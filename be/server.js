@@ -24,6 +24,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static('public'));
+app.use('/audio', express.static('public/audio'));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(prefixPath, apiRoute);
@@ -31,10 +32,14 @@ app.use(prefixPath, apiRoute);
 initSocket(server);
 
 const sendReminder = require('./helpers/sendReminder');
+const generateDailyVocabulary = require('./helpers/generateDailyVocabulary');
 
 if (process.env.NODE_ENV === 'development') {
   const cron = require('node-cron');
   cron.schedule('54 10 * * *', sendReminder);
+  cron.schedule('00 06 * * *', async () => {
+    await generateDailyVocabulary();
+  });
   console.log('Node-cron schedule active (development)');
 }
 

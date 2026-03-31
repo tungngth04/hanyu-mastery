@@ -94,6 +94,40 @@ const middleware = require('../middlewares/validate.middleware');
  *         description: Lỗi validation
  */
 
+/**
+ * @swagger
+ * /vocabulary/daily:
+ *   get:
+ *     summary: Lấy danh sách từ vựng theo ngày (fixed 10 từ)
+ *     description: Mỗi ngày sẽ trả về 10 từ vựng ngẫu nhiên nhưng cố định trong ngày đó.
+ *     tags: [Vocabulary]
+ *
+ *     responses:
+ *       200:
+ *         description: Lấy danh sách từ vựng thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: number
+ *                   example: 200
+ *
+ *                 message:
+ *                   type: string
+ *                   example: Lấy từ vựng hôm nay thành công
+ *
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *
+ *       400:
+ *         description: Lỗi request
+ */
+
 router.get('/', middleware(validate.getAllVocabulary), controller.getAllvocabulary);
+router.get('/daily', controller.getDailyVocabulary);
 
 module.exports = router;

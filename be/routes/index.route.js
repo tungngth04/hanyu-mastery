@@ -47,6 +47,10 @@ const listRoutesApi = [
     path: '/pronunciation',
     route: require('./pronunciation.route'),
   },
+  {
+    path: '/pinyin',
+    route: require('./pinyin.route'),
+  },
 ];
 
 listRoutesApi.forEach((route) => {
