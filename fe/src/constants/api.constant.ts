@@ -11,6 +11,7 @@ const apiConstant = {
   vocabulary: {
     getAll: "/vocabulary",
     getByTopicId: (id: string) => `/vocabulary/${id}`,
+    getDaily: "/vocabulary/daily",
   },
   flashCardDeck: {
     getAll: "/flashcard-deck",
@@ -48,6 +49,11 @@ const apiConstant = {
   },
   pronunciation: {
     upRecord: "/pronunciation",
+    speak: "/pinyin/speak",
+    speakInitial: "/pinyin/initial",
+    speakFinal: "/pinyin/final",
+    getPinyin: "/pinyin",
+    combine: "/pinyin/combine",
   },
   userDeckProgress: {
     study: "/user-deck-progress/study",

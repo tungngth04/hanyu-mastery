@@ -1,6 +1,10 @@
 import apiConstant from "@/src/constants/api.constant";
 import { RequestMethod } from "@/src/hooks/useHookReducers";
-import { IVocabularyResponse, IVocabularyTopic } from "@/src/types/interface";
+import {
+  IVocabulary,
+  IVocabularyResponse,
+  IVocabularyTopic,
+} from "@/src/types/interface";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const getTopic = createAsyncThunk<IVocabularyTopic[], void>(
@@ -32,6 +36,18 @@ export const getVocabulary = createAsyncThunk<
         },
       });
 
+      return result.data.data;
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const getDaily = createAsyncThunk<IVocabulary[], void>(
+  "vocabulary/getDaily",
+  async (_, { rejectWithValue }) => {
+    try {
+      const result = await RequestMethod.get(apiConstant.vocabulary.getDaily);
       return result.data.data;
     } catch (err) {
       return rejectWithValue(err);
