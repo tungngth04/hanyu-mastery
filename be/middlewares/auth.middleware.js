@@ -28,7 +28,7 @@ const auth = catchAsync(async (req, res, next) => {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Vui lòng đăng nhập hệ thống');
   }
 
-  if (user.isLocked) {
+  if (user.status === 'locked') {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Tài khoản đã bị khoá');
   }
 

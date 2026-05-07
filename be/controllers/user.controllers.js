@@ -68,8 +68,57 @@ const changePassword = catchAsync(async (req, res) => {
   });
 });
 
+const getAllUsers = catchAsync(async (req, res) => {
+  const users = await User.find({ deleted: false }).select('-password');
+
+  res.status(httpStatus.OK).json({
+    message: 'Lấy danh sách người dùng thành công',
+    data: { users },
+  });
+});
+
+const getUserDetail = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  const user = await User.findById(id).select('-password');
+
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy người dùng');
+  }
+
+  res.status(httpStatus.OK).json({
+    message: 'Lấy chi tiết người dùng thành công',
+    data: { user },
+  });
+});
+
+const toggleUserStatus = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  const user = await User.findById(id);
+
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy người dùng');
+  }
+
+  const newStatus = user.status === 'active' ? 'locked' : 'active';
+
+  user.status = newStatus;
+  await user.save();
+
+  res.status(httpStatus.OK).json({
+    message: `${newStatus === 'locked' ? 'Khoá' : 'Mở khoá'} tài khoản thành công`,
+    data: {
+      user,
+    },
+  });
+});
+
 module.exports = {
   updateNotification,
   updateProfile,
   changePassword,
+  getAllUsers,
+  getUserDetail,
+  toggleUserStatus,
 };

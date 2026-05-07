@@ -8,6 +8,7 @@ const VideoProgress = require('../models/videoProgress.model');
 const { getYoutubeId } = require('../helpers/getYoutubeId');
 const { getYoutubeInfo } = require('../helpers/getYoutubeInfo');
 const SavedVideo = require('../models/videoSave.model');
+const ApiError = require('../utils/ApiError');
 
 const createYoutubeVideo = catchAsync(async (req, res) => {
   const { title, url, level, description } = req.body;
@@ -167,6 +168,7 @@ const getVideoDetail = catchAsync(async (req, res) => {
   });
 });
 
+
 const deleteVideo = catchAsync(async (req, res) => {
   await Video.findByIdAndDelete(req.params.id);
 
@@ -176,10 +178,47 @@ const deleteVideo = catchAsync(async (req, res) => {
   });
 });
 
+const updateVideo = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  const video = await Video.findById(id);
+  if (!video) {
+    throw new ApiError(404, 'Không tìm thấy video');
+  }
+
+  const { title, description, level, url, thumbnail } = req.body;
+
+  // update basic
+  if (title !== undefined) video.title = title;
+  if (description !== undefined) video.description = description;
+  if (level !== undefined) video.level = level;
+  if (thumbnail !== undefined) video.thumbnail = thumbnail;
+
+  // nếu là youtube và có url mới
+  if (video.type === 'youtube' && url) {
+    const videoId = getYoutubeId(url);
+    if (!videoId) {
+      throw new ApiError(400, 'Link YouTube không hợp lệ');
+    }
+
+    video.videoId = videoId;
+    video.thumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+  }
+
+  await video.save();
+
+  res.status(200).json({
+    code: 200,
+    message: 'Cập nhật video thành công',
+    data: video,
+  });
+});
+
 module.exports = {
   createYoutubeVideo,
   createS3Video,
   getAllVideos,
   getVideoDetail,
   deleteVideo,
+  updateVideo
 };

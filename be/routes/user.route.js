@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 
-const { auth } = require('../middlewares/auth.middleware');
+const { auth, author } = require('../middlewares/auth.middleware');
 const controller = require('../controllers/user.controllers');
 const validate = require('../validations/user.validate');
 const middleware = require('../middlewares/validate.middleware');
@@ -142,8 +142,155 @@ const upload = multer();
  *         description: Chưa đăng nhập
  */
 
+/**
+ * @swagger
+ * /users/all:
+ *   get:
+ *     summary: Lấy danh sách tất cả người dùng (Admin)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lấy danh sách người dùng thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Lấy danh sách người dùng thành công
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     users:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           fullName:
+ *                             type: string
+ *                           email:
+ *                             type: string
+ *                           phone:
+ *                             type: string
+ *                           birthday:
+ *                             type: string
+ *                             format: date-time
+ *                           role:
+ *                             type: string
+ *                           status:
+ *                             type: string
+ *                             example: active
+ *       401:
+ *         description: Chưa đăng nhập
+ *       403:
+ *         description: Không có quyền (không phải admin)
+ */
+
+/**
+ * @swagger
+ * /users/detail/{id}:
+ *   get:
+ *     summary: Lấy thông tin chi tiết người dùng (Admin)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID người dùng
+ *     responses:
+ *       200:
+ *         description: Lấy chi tiết người dùng thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       type: object
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                         fullName:
+ *                           type: string
+ *                         email:
+ *                           type: string
+ *                         phone:
+ *                           type: string
+ *                         birthday:
+ *                           type: string
+ *                           format: date-time
+ *                         avatar:
+ *                           type: string
+ *                         role:
+ *                           type: string
+ *                         status:
+ *                           type: string
+ *       404:
+ *         description: Không tìm thấy người dùng
+ */
+
+/**
+ * @swagger
+ * /users/toggle-status/{id}:
+ *   patch:
+ *     summary: Khoá hoặc mở khoá tài khoản người dùng (Admin)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID người dùng
+ *     responses:
+ *       200:
+ *         description: Cập nhật trạng thái thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Khoá tài khoản thành công
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       type: object
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                         status:
+ *                           type: string
+ *                           example: locked
+ *       400:
+ *         description: Không thể tự khoá tài khoản
+ *       404:
+ *         description: Không tìm thấy người dùng
+ */
+
 router.patch('/notification', auth, controller.updateNotification);
 router.patch('/profile', auth, upload.single('avatar'), uploadSingle('avatars'), controller.updateProfile);
 router.patch('/change-password', auth, middleware(validate.changePassword), controller.changePassword);
+router.get('/all', auth, author(['admin']), controller.getAllUsers);
+router.get('/detail/:id', auth, author(['admin']), controller.getUserDetail);
+router.patch('/toggle-status/:id', auth, author(['admin']), controller.toggleUserStatus);
 
 module.exports = router;

@@ -2,8 +2,10 @@ const express = require('express');
 const router = express.Router();
 
 const controller = require('../controllers/video.controller');
-const { auth } = require('../middlewares/auth.middleware');
+const { auth, author } = require('../middlewares/auth.middleware');
 const upload = require('../middlewares/uploadVideo.middlewares');
+const middleware = require('../middlewares/validate.middleware');
+const validate = require('../validations/video.validate');
 
 /**
  * @swagger
@@ -16,7 +18,7 @@ const upload = require('../middlewares/uploadVideo.middlewares');
  * @swagger
  * /videos/youtube:
  *   post:
- *     summary: Tạo video từ YouTube
+ *     summary: Tạo video từ YouTube (Admin)
  *     tags: [Video]
  *     requestBody:
  *       required: true
@@ -62,7 +64,7 @@ const upload = require('../middlewares/uploadVideo.middlewares');
  * @swagger
  * /videos/upload:
  *   post:
- *     summary: Upload video lên S3
+ *     summary: Upload video lên S3 (Admin)
  *     tags: [Video]
  *     requestBody:
  *       required: true
@@ -219,8 +221,43 @@ const upload = require('../middlewares/uploadVideo.middlewares');
 /**
  * @swagger
  * /videos/{id}:
+ *   patch:
+ *     summary: Cập nhật video (Admin)
+ *     tags: [Video]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               level:
+ *                 type: number
+ *               url:
+ *                 type: string
+ *               thumbnail:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Cập nhật thành công
+ */
+
+/**
+ * @swagger
+ * /videos/{id}:
  *   delete:
- *     summary: Xóa video
+ *     summary: Xóa video (Admin)
  *     tags: [Video]
  *     parameters:
  *       - in: path
@@ -233,10 +270,25 @@ const upload = require('../middlewares/uploadVideo.middlewares');
  *       200:
  *         description: Xóa thành công
  */
-router.post('/youtube', auth, controller.createYoutubeVideo);
-router.post('/upload', auth, upload.single('video'), controller.createS3Video);
+
+router.post(
+  '/youtube',
+  auth,
+  author(['admin']),
+  middleware(validate.createYoutubeVideo),
+  controller.createYoutubeVideo,
+);
+router.post(
+  '/upload',
+  auth,
+  author(['admin']),
+  upload.single('video'),
+  middleware(validate.createS3Video),
+  controller.createS3Video,
+);
 router.get('/', auth, controller.getAllVideos);
 router.get('/:id', auth, controller.getVideoDetail);
-router.delete('/:id', auth, controller.deleteVideo);
+router.patch('/:id', auth, author(['admin']), middleware(validate.updateVideo), controller.updateVideo);
+router.delete('/:id', auth, author(['admin']), middleware(validate.deleteVideo), controller.deleteVideo);
 
 module.exports = router;

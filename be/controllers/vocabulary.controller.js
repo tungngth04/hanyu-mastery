@@ -12,10 +12,14 @@ const getAllvocabulary = catchAsync(async (req, res) => {
   const filter = topicId ? { topicId } : {};
 
   const vocabularies = await Vocabulary.find(filter)
-    .sort({ level: 1 })
+    .sort({ createdAt: -1 })
     .skip(skip)
     .limit(+pageSize)
-    .select('-__v -createdAt -updatedAt');
+    .select('-__v -createdAt -updatedAt')
+    .populate({
+      path: 'topicId',
+      select: 'name',
+    });
 
   if (vocabularies.length === 0) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy từ vựng!');
@@ -54,4 +58,67 @@ const getDailyVocabulary = catchAsync(async (req, res) => {
   });
 });
 
-module.exports = { getAllvocabulary, getDailyVocabulary };
+const createVocabulary = catchAsync(async (req, res) => {
+  const { hanzi, pinyin, meaning, example, exampleMeaning, level, strokeCount, radical, audio, topicId } = req.body;
+
+  const exist = await Vocabulary.findOne({ hanzi, topicId });
+  if (exist) {
+    throw new ApiError(400, 'Từ vựng đã tồn tại trong chủ đề này');
+  }
+
+  const vocab = await Vocabulary.create({
+    hanzi,
+    pinyin,
+    meaning,
+    example,
+    exampleMeaning,
+    level,
+    strokeCount,
+    radical,
+    audio,
+    topicId,
+  });
+
+  res.status(201).json({
+    code: 201,
+    message: 'Thêm từ vựng thành công',
+    data: vocab,
+  });
+});
+
+const updateVocabulary = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  const vocab = await Vocabulary.findById(id);
+  if (!vocab) {
+    throw new ApiError(404, 'Không tìm thấy từ vựng');
+  }
+
+  Object.assign(vocab, req.body);
+
+  await vocab.save();
+
+  res.status(200).json({
+    code: 200,
+    message: 'Cập nhật từ vựng thành công',
+    data: vocab,
+  });
+});
+
+const deleteVocabulary = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  const vocab = await Vocabulary.findById(id);
+  if (!vocab) {
+    throw new ApiError(404, 'Không tìm thấy từ vựng');
+  }
+
+  await vocab.deleteOne();
+
+  res.status(200).json({
+    code: 200,
+    message: 'Xoá từ vựng thành công',
+  });
+});
+
+module.exports = { getAllvocabulary, getDailyVocabulary, createVocabulary, updateVocabulary, deleteVocabulary };

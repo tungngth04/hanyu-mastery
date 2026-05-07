@@ -4,6 +4,7 @@ const router = express.Router();
 const controller = require('../controllers/vocabulary.controller');
 const validate = require('../validations/vocabulary.valtdate');
 const middleware = require('../middlewares/validate.middleware');
+const { author, auth } = require('../middlewares/auth.middleware');
 
 /**
  * @swagger
@@ -127,7 +128,86 @@ const middleware = require('../middlewares/validate.middleware');
  *         description: Lỗi request
  */
 
+/**
+ * @swagger
+ * /vocabulary:
+ *   post:
+ *     summary: Thêm từ vựng (Admin)
+ *     tags: [Vocabulary]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - hanzi
+ *               - meaning
+ *               - topicId
+ *             properties:
+ *               hanzi:
+ *                 type: string
+ *               pinyin:
+ *                 type: string
+ *               meaning:
+ *                 type: string
+ *               example:
+ *                 type: string
+ *               exampleMeaning:
+ *                 type: string
+ *               level:
+ *                 type: number
+ *               topicId:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Thêm thành công
+ */
+
+/**
+ * @swagger
+ * /vocabulary/{id}:
+ *   patch:
+ *     summary: Cập nhật từ vựng (Admin)
+ *     tags: [Vocabulary]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Cập nhật thành công
+ */
+
+/**
+ * @swagger
+ * /vocabulary/{id}:
+ *   delete:
+ *     summary: Xoá từ vựng (Admin)
+ *     tags: [Vocabulary]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Xoá thành công
+ */
+
 router.get('/', middleware(validate.getAllVocabulary), controller.getAllvocabulary);
 router.get('/daily', controller.getDailyVocabulary);
+router.post('/', auth, author(['admin']), middleware(validate.createVocabulary), controller.createVocabulary);
+router.patch('/:id', auth, author(['admin']), middleware(validate.updateVocabulary), controller.updateVocabulary);
+router.delete('/:id', auth, author(['admin']), middleware(validate.deleteVocabulary), controller.deleteVocabulary);
 
 module.exports = router;

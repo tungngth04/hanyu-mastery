@@ -14,6 +14,16 @@ const userSchema = new mongoose.Schema(
     fullName: String,
     email: String,
     password: String,
+
+    phone: {
+      type: String,
+      default: '',
+    },
+
+    birthday: {
+      type: Date,
+    },
+
     // profile
     avatar: {
       type: String,
@@ -50,6 +60,7 @@ const userSchema = new mongoose.Schema(
 
     status: {
       type: String,
+      enum: ['active', 'locked'],
       default: 'active',
     },
 

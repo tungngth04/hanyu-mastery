@@ -53,7 +53,9 @@ app.post('/cron/reminder', async (req, res) => {
   }
 });
 
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
+  console.error(err);
+
   const statusCode = err.status || 500;
 
   res.status(statusCode).json({
