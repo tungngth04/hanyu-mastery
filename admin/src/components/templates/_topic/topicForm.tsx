@@ -5,32 +5,19 @@ import { Form, Input } from "antd";
 
 const { TextArea } = Input;
 
-interface Props {
-  form: any;
-  initialValues?: any;
-}
-
-const TopicForm = ({ form, initialValues }: Props) => {
+const TopicForm = ({ form }: { form: any }) => {
   return (
-    <Form form={form} layout="vertical" initialValues={initialValues}>
+    <Form form={form} layout="vertical">
       <Form.Item
-        label="Tên bộ flashcard"
-        name="title"
-        rules={[{ required: true, message: "Vui lòng nhập tên!" }]}
+        label="Tên chủ đề"
+        name="name"
+        rules={[{ required: true, message: "Vui lòng nhập tên chủ đề" }]}
       >
-        <Input placeholder="VD: HSK 3 từ vựng" />
+        <Input placeholder="Nhập tên chủ đề..." />
       </Form.Item>
 
-      <Form.Item label="Mô tả" name="desc">
+      <Form.Item label="Mô tả" name="description">
         <TextArea rows={3} placeholder="Nhập mô tả..." />
-      </Form.Item>
-
-      <Form.Item
-        label="Chủ đề"
-        name="category"
-        rules={[{ required: true, message: "Vui lòng nhập chủ đề!" }]}
-      >
-        <Input placeholder="VD: Giao tiếp" />
       </Form.Item>
     </Form>
   );

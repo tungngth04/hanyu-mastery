@@ -2,10 +2,31 @@
 "use client";
 
 import { Form, Input, InputNumber, Select } from "antd";
+import { useEffect, useState } from "react";
+import { useAppDispatch } from "@/src/hooks/useHookReducers";
+import { getAllTopics } from "@/src/services/vocabulary";
 
-const { TextArea } = Input;
-
+type Topic = {
+  _id: string;
+  name: string;
+  description?: string;
+};
 const VocabularyForm = ({ form }: { form: any }) => {
+  const dispatch = useAppDispatch();
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const { TextArea } = Input;
+
+  useEffect(() => {
+    const fetchTopics = async () => {
+      const res = await dispatch(
+        getAllTopics({ page: 1, pageSize: 1000 }),
+      ).unwrap();
+      setTopics(res);
+    };
+
+    fetchTopics();
+  }, []);
+
   return (
     <Form form={form} layout="vertical">
       <Form.Item
@@ -36,7 +57,7 @@ const VocabularyForm = ({ form }: { form: any }) => {
         <TextArea rows={2} placeholder="你好，我叫..." />
       </Form.Item>
 
-      <Form.Item label="Nghĩa ví dụ" name="example_meaning">
+      <Form.Item label="Nghĩa ví dụ" name="exampleMeaning">
         <TextArea rows={2} placeholder="Xin chào, tôi tên là..." />
       </Form.Item>
 
@@ -54,8 +75,8 @@ const VocabularyForm = ({ form }: { form: any }) => {
         />
       </Form.Item>
 
-      <Form.Item label="Số nét" name="stroke_count">
-        <InputNumber style={{ width: "100%" }} />
+      <Form.Item label="Số nét" name="strokeCount">
+        <Input style={{ width: "100%" }} />
       </Form.Item>
 
       <Form.Item label="Bộ thủ" name="radical">
@@ -67,11 +88,17 @@ const VocabularyForm = ({ form }: { form: any }) => {
       </Form.Item>
 
       <Form.Item
-        label="Topic ID"
-        name="topic_id"
-        rules={[{ required: true, message: "Nhập topic id" }]}
+        label="Chủ đề"
+        name="topicId"
+        rules={[{ required: true, message: "Chọn chủ đề" }]}
       >
-        <Input placeholder="topic-1" />
+        <Select
+          placeholder="Chọn chủ đề"
+          options={topics.map((t) => ({
+            value: t._id,
+            label: t.name,
+          }))}
+        />
       </Form.Item>
     </Form>
   );

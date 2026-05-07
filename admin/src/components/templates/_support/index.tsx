@@ -1,45 +1,110 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
 import { Card } from "../../atoms/card";
-import { Table, Tag, Button as AntButton, Modal, Select } from "antd";
+import {
+  Table,
+  Tag,
+  Button as AntButton,
+  Modal,
+  Select,
+  Pagination,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Eye } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  getAllSupport,
+  getSupportDetail,
+  updateSupportStatus,
+} from "@/src/services/support";
+import useNotification from "@/src/hooks/useNotification";
+import { useAppDispatch } from "@/src/hooks/useHookReducers";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const SupportManagement = () => {
   const [selectedSupport, setSelectedSupport] = useState<any>(null);
   const [openDetail, setOpenDetail] = useState(false);
 
-  const supports = [
-    {
-      id: "1",
-      full_name: "Nguyễn Văn A",
-      email: "vana@gmail.com",
-      subject: "Không đăng nhập được",
-      message: "Tôi không thể đăng nhập vào hệ thống.",
-      status: "pending",
-      created_at: "01/04/2026",
-    },
-    {
-      id: "2",
-      full_name: "Trần Thị B",
-      email: "b@gmail.com",
-      subject: "Lỗi video",
-      message: "Video không phát được.",
-      status: "resolved",
-      created_at: "02/04/2026",
-    },
-  ];
+  const dispatch = useAppDispatch();
+  const { notify } = useNotification();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const handleUpdateStatus = (record: any, value: string) => {
-    console.log("UPDATE STATUS:", record.id, value);
+  const [supports, setSupports] = useState<any[]>([]);
+  const [pagination, setPagination] = useState({
+    current: Number(searchParams.get("page")) || 1,
+    pageSize: Number(searchParams.get("limit")) || 10,
+  });
+
+  const [total, setTotal] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await dispatch(
+          getAllSupport({
+            page: pagination.current,
+            limit: pagination.pageSize,
+          }),
+        ).unwrap();
+
+        setSupports(res.supports);
+        setTotal(res.total);
+        notify("success", "Tải danh sách hỗ trợ thành công");
+      } catch (err) {
+        notify("error", "Không thể tải danh sách hỗ trợ");
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleUpdateStatus = async (record: any, value: string) => {
+    try {
+      await dispatch(
+        updateSupportStatus({
+          id: record._id,
+          status: value,
+        }),
+      ).unwrap();
+
+      notify("success", "Cập nhật trạng thái thành công");
+
+      setSupports((prev) =>
+        prev.map((item) =>
+          item._id === record._id ? { ...item, status: value } : item,
+        ),
+      );
+    } catch (err) {
+      notify("error", "Cập nhật thất bại");
+    }
+  };
+
+  const handleViewDetail = async (record: any) => {
+    try {
+      const res = await dispatch(getSupportDetail(record._id)).unwrap();
+
+      setSelectedSupport(res);
+      setOpenDetail(true);
+    } catch (err) {
+      notify("error", "Không thể lấy chi tiết");
+    }
   };
 
   const columns: ColumnsType<any> = [
     {
+      title: "STT",
+      key: "index",
+      width: 70,
+      align: "center",
+      render: (_: any, __: any, index: number) => {
+        return (pagination.current - 1) * pagination.pageSize + index + 1;
+      },
+    },
+    {
       title: "Người gửi",
-      dataIndex: "full_name",
+      dataIndex: "fullName",
     },
     {
       title: "Email",
@@ -51,7 +116,8 @@ const SupportManagement = () => {
     },
     {
       title: "Ngày gửi",
-      dataIndex: "created_at",
+      dataIndex: "createdAt",
+      render: (date) => new Date(date).toLocaleDateString(),
     },
     {
       title: "Trạng thái",
@@ -71,16 +137,13 @@ const SupportManagement = () => {
     {
       title: "Thao tác",
       key: "action",
-      align: "right",
+      align: "center",
       fixed: "end",
       render: (_, record) => (
-        <div className="flex justify-end">
+        <div className="flex justify-center">
           <button
-            onClick={() => {
-              setSelectedSupport(record);
-              setOpenDetail(true);
-            }}
-            className="h-8 w-8 flex items-center justify-center rounded hover:bg-gray-100"
+            onClick={() => handleViewDetail(record)}
+            className="h-8 w-8 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer"
           >
             <Eye size={16} />
           </button>
@@ -89,23 +152,47 @@ const SupportManagement = () => {
     },
   ];
 
+  const handleChangePagination = (page: number, pageSize: number) => {
+    setPagination({
+      current: page,
+      pageSize: pageSize,
+    });
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(page));
+    params.set("limit", String(pageSize));
+
+    router.push(`?${params.toString()}`);
+  };
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Quản lý liên hệ</h2>
-        <p className="text-gray-500">
-          Quản lý phản hồi và liên hệ từ người dùng.
-        </p>
+        <h2 className="text-3xl font-bold">Quản lý liên hệ</h2>
       </div>
 
       <Card className="rounded-2xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div>
           <Table
             columns={columns}
             dataSource={supports}
-            rowKey="id"
-            pagination={{ pageSize: 5 }}
+            rowKey="_id"
+            pagination={false}
             scroll={{ x: "max-content" }}
+          />
+        </div>
+        <div className="px-3 py-4 flex justify-end">
+          <Pagination
+            total={total}
+            current={pagination.current}
+            pageSize={pagination.pageSize}
+            showSizeChanger
+            showTotal={(total, range) =>
+              `${range[0]} - ${range[1]} trong ${total} liên hệ`
+            }
+            onChange={handleChangePagination}
+            locale={{
+              items_per_page: " / trang",
+            }}
           />
         </div>
       </Card>
@@ -124,7 +211,7 @@ const SupportManagement = () => {
         {selectedSupport && (
           <div className="space-y-3">
             <div>
-              <strong>Họ tên:</strong> {selectedSupport.full_name}
+              <strong>Họ tên:</strong> {selectedSupport.fullName}
             </div>
 
             <div>

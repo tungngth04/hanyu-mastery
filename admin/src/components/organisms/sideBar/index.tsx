@@ -6,6 +6,7 @@ import {
   Layers,
   LayoutDashboard,
   Phone,
+  User,
   Users,
   Video,
 } from "lucide-react";
@@ -55,11 +56,9 @@ const SideBar = ({ sidebarOpen }: SideBarProps) => {
 
   return (
     <aside
-      className={`bg-white border-r border-slate-200 flex flex-col transition-all duration-300 z-20 ${
-        sidebarOpen
-          ? "w-64"
-          : "w-0 -translate-x-full overflow-hidden absolute h-full"
-      } md:relative md:translate-x-0`}
+      className={`fixed top-0 left-0 h-screen bg-white border-r border-slate-200 flex flex-col transition-all duration-300 z-40 ${
+        sidebarOpen ? "w-64" : "w-0 -translate-x-full overflow-hidden"
+      }`}
     >
       <div className="flex items-center gap-2 font-bold text-xl text-primary">
         <Image

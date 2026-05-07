@@ -40,7 +40,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }: HeaderProps) => {
       ? userInfor.avatar
       : "https://i.pravatar.cc/100";
   return (
-    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 z-10 shrink-0">
+    <header className="fixed top-0 left-64 right-0 h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 z-50">
       <div className="flex items-center gap-4">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -70,7 +70,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }: HeaderProps) => {
         <div className="flex items-center gap-3">
           <div className="hidden sm:block text-right">
             <p className="text-sm font-bold text-slate-900 leading-none">
-              Admin User
+              {userInfor?.fullName}
             </p>
             <p className="text-xs text-slate-500">Quản trị viên</p>
           </div>
