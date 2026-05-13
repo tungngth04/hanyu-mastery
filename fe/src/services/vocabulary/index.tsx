@@ -8,22 +8,19 @@ import {
 } from "@/src/types/interface";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-export const getTopic = createAsyncThunk<IVocabularyTopic[], void>(
-  "vocabulary-topic/getTopic",
-  async (params: any, { rejectWithValue }) => {
-    try {
-      const result = await RequestMethod.get(
-        apiConstant.vocabularyTopic.getAll,
-        {
-          params,
-        },
-      );
-      return result.data.data.topics;
-    } catch (err) {
-      return rejectWithValue(err);
-    }
-  },
-);
+export const getTopic = createAsyncThunk<
+  IVocabularyTopic[],
+  { pageSize?: number }
+>("vocabulary-topic/getTopic", async (params, { rejectWithValue }) => {
+  try {
+    const result = await RequestMethod.get(apiConstant.vocabularyTopic.getAll, {
+      params,
+    });
+    return result.data.data.topics;
+  } catch (err) {
+    return rejectWithValue(err);
+  }
+});
 
 export const getVocabulary = createAsyncThunk<
   IVocabularyResponse,

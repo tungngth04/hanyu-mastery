@@ -154,7 +154,6 @@ const VocabularyPage = () => {
 
     loadDecks();
   }, []);
-  console.log("firsdfdt", flashcardDecks);
 
   const handleAddToFlashcard = async (deckId: string, vocabularyId: string) => {
     try {
