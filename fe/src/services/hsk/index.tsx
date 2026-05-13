@@ -64,7 +64,8 @@ export const submitHSKExam = createAsyncThunk(
     values: {
       examId: string;
       answers: {
-        questionId: string;
+        questionId?: string;
+        questionNumber?: number;
         answer: number | string;
       }[];
     },
