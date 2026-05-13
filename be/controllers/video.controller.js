@@ -168,7 +168,6 @@ const getVideoDetail = catchAsync(async (req, res) => {
   });
 });
 
-
 const deleteVideo = catchAsync(async (req, res) => {
   await Video.findByIdAndDelete(req.params.id);
 
@@ -220,5 +219,5 @@ module.exports = {
   getAllVideos,
   getVideoDetail,
   deleteVideo,
-  updateVideo
+  updateVideo,
 };

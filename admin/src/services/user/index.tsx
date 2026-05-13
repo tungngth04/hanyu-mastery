@@ -1,17 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import apiConstant from "@/src/constants/api.constant";
 import { RequestMethod } from "@/src/hooks/useHookReducers";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const getAllUsers = createAsyncThunk(
   "users/getAll",
-  async (
-    { page, limit }: { page: number; limit: number },
-    { rejectWithValue },
-  ) => {
+  async (params: any, { rejectWithValue }) => {
     try {
-      const res = await RequestMethod.get(
-        `${apiConstant.users.getAll}?page=${page}&limit=${limit}`,
-      );
+      const res = await RequestMethod.get(apiConstant.users.getAll, {
+        params,
+      });
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err);
@@ -94,6 +92,30 @@ export const changePassword = createAsyncThunk(
       return response.data;
     } catch (error) {
       return rejectWithValue(error);
+    }
+  },
+);
+
+export const getDashboardOverview = createAsyncThunk(
+  "dashboard/overview",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await RequestMethod.get(apiConstant.users.dashboardOverview);
+      return res.data.data;
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const getUserGrowth = createAsyncThunk(
+  "dashboard/userGrowth",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await RequestMethod.get(apiConstant.users.userGrowth);
+      return res.data.data;
+    } catch (err) {
+      return rejectWithValue(err);
     }
   },
 );

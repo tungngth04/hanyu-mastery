@@ -17,6 +17,9 @@ const UsersManagement = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const [search, setSearch] = useState("");
+  const [keyword, setKeyword] = useState("");
+
   const [users, setUsers] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
 
@@ -27,26 +30,28 @@ const UsersManagement = () => {
 
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [openDetail, setOpenDetail] = useState(false);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await dispatch(
+        getAllUsers({
+          page: pagination.current,
+          limit: pagination.pageSize,
+          search,
+        }),
+      ).unwrap();
+      notify("success", "Tải danh sách user thành công");
+
+      setUsers(res.users);
+      setTotal(res.users.length);
+    } catch {
+      notify("error", "Không tải được danh sách user");
+    }
+  };
+
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const res = await dispatch(
-          getAllUsers({
-            page: pagination.current,
-            limit: pagination.pageSize,
-          }),
-        ).unwrap();
-        notify("success", "Tải danh sách user thành công");
-
-        setUsers(res.users);
-        setTotal(res.users.length);
-      } catch {
-        notify("error", "Không tải được danh sách user");
-      }
-    };
-
     fetchUsers();
-  }, [pagination]);
+  }, [pagination, search]);
 
   const handleToggleStatus = (record: any) => {
     Modal.confirm({
@@ -66,15 +71,7 @@ const UsersManagement = () => {
 
           notify("success", "Cập nhật trạng thái thành công");
 
-          const res = await dispatch(
-            getAllUsers({
-              page: pagination.current,
-              limit: pagination.pageSize,
-            }),
-          ).unwrap();
-
-          setUsers(res.users);
-          setTotal(res.total);
+          fetchUsers();
         } catch {
           notify("error", "Lỗi cập nhật");
         }
@@ -115,13 +112,14 @@ const UsersManagement = () => {
           </div>
         </div>
       ),
+      sorter: (a, b) => a.fullName.localeCompare(b.fullName),
     },
     {
       title: "Email",
       dataIndex: "email",
       width: 250,
-
       render: (email) => email || "—",
+      sorter: (a, b) => a.email.localeCompare(b.email),
     },
     {
       title: "SĐT",
@@ -140,29 +138,10 @@ const UsersManagement = () => {
       ),
     },
     {
-      title: "Mục tiêu",
-      dataIndex: "learningGoal",
-      width: 250,
-      render: (text) => (
-        <span className="text-gray-600 text-sm line-clamp-2">
-          {text || "—"}
-        </span>
-      ),
-    },
-    {
-      title: "Mục tiêu",
-      dataIndex: "learningGoal",
-      width: 250,
-      render: (text) => (
-        <span className="text-gray-600 text-sm line-clamp-2">
-          {text || "—"}
-        </span>
-      ),
-    },
-    {
       title: "Streak",
       dataIndex: "studyStreak",
       align: "center",
+      sorter: (a, b) => a.studyStreak - b.studyStreak,
     },
     {
       title: "Role",
@@ -230,8 +209,23 @@ const UsersManagement = () => {
 
       <div className="flex justify-between items-center gap-4">
         <div className="relative w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <Input placeholder="Tìm tên, email học viên..." className="pl-9" />
+          <Input
+            placeholder="Tìm tên, email học viên..."
+            className="pl-9"
+            allowClear
+            onChange={(e) => {
+              const value = e.target.value;
+              setKeyword(value);
+
+              if (!value) {
+                setSearch("");
+              }
+            }}
+            onPressEnter={() => {
+              if (!keyword.trim()) return;
+              setSearch(keyword);
+            }}
+          />
         </div>
 
         <Button icon={<Download size={16} />}>Xuất Excel</Button>

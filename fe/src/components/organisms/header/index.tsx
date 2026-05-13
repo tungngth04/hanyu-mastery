@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "@/src/hooks/useHookReducers";
 import useNotification from "@/src/hooks/useNotification";
 import { clearAuth } from "@/src/services/auth";
 import { Divider } from "antd";
-import { BellDot, LogOut, Search, User } from "lucide-react";
+import { BellDot, Bookmark, LogOut, Search, User } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -73,6 +73,21 @@ const Header = () => {
             >
               <User size={18} />
               Hồ sơ cá nhân
+            </button>
+
+            <div className="px-6">
+              <Divider style={{ margin: 0, borderColor: "white" }} />
+            </div>
+            <div className="px-6">
+              <Divider style={{ margin: 0, borderColor: "white" }} />
+            </div>
+
+            <button
+              className="flex items-center gap-3 px-6 py-3 w-full hover:bg-purple-400 transition cursor-pointer"
+              onClick={() => router.push("/saved-videos")}
+            >
+              <Bookmark size={18} />
+              Video đã lưu
             </button>
 
             <div className="px-6">

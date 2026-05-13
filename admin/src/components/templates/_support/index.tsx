@@ -9,6 +9,7 @@ import {
   Modal,
   Select,
   Pagination,
+  Input,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Eye } from "lucide-react";
@@ -23,42 +24,46 @@ import { useAppDispatch } from "@/src/hooks/useHookReducers";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const SupportManagement = () => {
-  const [selectedSupport, setSelectedSupport] = useState<any>(null);
-  const [openDetail, setOpenDetail] = useState(false);
-
   const dispatch = useAppDispatch();
   const { notify } = useNotification();
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const [search, setSearch] = useState("");
+  const [keyword, setKeyword] = useState("");
+
+  const [selectedSupport, setSelectedSupport] = useState<any>(null);
+  const [openDetail, setOpenDetail] = useState(false);
+
   const [supports, setSupports] = useState<any[]>([]);
+  const [total, setTotal] = useState(0);
+
   const [pagination, setPagination] = useState({
     current: Number(searchParams.get("page")) || 1,
     pageSize: Number(searchParams.get("limit")) || 10,
   });
 
-  const [total, setTotal] = useState(0);
+  const fetchData = async () => {
+    try {
+      const res = await dispatch(
+        getAllSupport({
+          page: pagination.current,
+          limit: pagination.pageSize,
+          search,
+        }),
+      ).unwrap();
+
+      setSupports(res.supports);
+      setTotal(res.total);
+      notify("success", "Tải danh sách hỗ trợ thành công");
+    } catch (err) {
+      notify("error", "Không thể tải danh sách hỗ trợ");
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await dispatch(
-          getAllSupport({
-            page: pagination.current,
-            limit: pagination.pageSize,
-          }),
-        ).unwrap();
-
-        setSupports(res.supports);
-        setTotal(res.total);
-        notify("success", "Tải danh sách hỗ trợ thành công");
-      } catch (err) {
-        notify("error", "Không thể tải danh sách hỗ trợ");
-      }
-    };
-
     fetchData();
-  }, []);
+  }, [pagination, search]);
 
   const handleUpdateStatus = async (record: any, value: string) => {
     try {
@@ -71,11 +76,7 @@ const SupportManagement = () => {
 
       notify("success", "Cập nhật trạng thái thành công");
 
-      setSupports((prev) =>
-        prev.map((item) =>
-          item._id === record._id ? { ...item, status: value } : item,
-        ),
-      );
+      fetchData();
     } catch (err) {
       notify("error", "Cập nhật thất bại");
     }
@@ -105,14 +106,17 @@ const SupportManagement = () => {
     {
       title: "Người gửi",
       dataIndex: "fullName",
+      sorter: (a, b) => a.fullName.localeCompare(b.fullName),
     },
     {
       title: "Email",
       dataIndex: "email",
+      sorter: (a, b) => a.email.localeCompare(b.email),
     },
     {
       title: "Tiêu đề",
       dataIndex: "subject",
+      sorter: (a, b) => a.subject.localeCompare(b.subject),
     },
     {
       title: "Ngày gửi",
@@ -168,6 +172,25 @@ const SupportManagement = () => {
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold">Quản lý liên hệ</h2>
+      </div>
+
+      <div className="w-80">
+        <Input
+          placeholder="Tìm theo người gửi, email, tiêu đề ..."
+          allowClear
+          onChange={(e) => {
+            const value = e.target.value;
+            setKeyword(value);
+
+            if (!value) {
+              setSearch("");
+            }
+          }}
+          onPressEnter={() => {
+            if (!keyword.trim()) return;
+            setSearch(keyword);
+          }}
+        />
       </div>
 
       <Card className="rounded-2xl shadow-sm overflow-hidden">

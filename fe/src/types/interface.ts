@@ -36,6 +36,7 @@ export interface IVocabulary {
   level: number;
   radical: string;
   audio: string;
+  strokeCount: number;
 
   status?: string;
 }

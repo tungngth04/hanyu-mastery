@@ -12,10 +12,12 @@ const apiConstant = {
     getAll: "/vocabulary",
     getByTopicId: (id: string) => `/vocabulary/${id}`,
     getDaily: "/vocabulary/daily",
+    addToDeck: "/vocabulary/add",
   },
   flashCardDeck: {
     getAll: "/flashcard-deck",
     getStats: "/flashcard-deck/stats",
+    create: "/flashcard-deck",
   },
   flashcard: {
     getByDeckId: (id: string) => `/flashcard/${id}`,
@@ -25,6 +27,7 @@ const apiConstant = {
     updateNotification: "/users/notification",
     updateProfile: "/users/profile",
     changePassword: "/users/change-password",
+    getLearningStats: "/users/dashboard/learning-stats",
   },
   supports: {
     createSupport: "/supports/create-support",
@@ -57,6 +60,18 @@ const apiConstant = {
   },
   userDeckProgress: {
     study: "/user-deck-progress/study",
+  },
+  grammar: {
+    getSidebar: "/grammar/sidebar",
+    getLessonDetail: (lessonId: string) => `/grammar/lesson/${lessonId}`,
+    updateProgress: "/grammar/progress",
+  },
+  hskExam: {
+    getAll: "/hsk-exam",
+    getById: (id: string) => `/hsk-exam/${id}`,
+    submit: "/hsk-exam-result/submit",
+    saveAnswer: "/hsk-exam/save-answer",
+    getResult: (examId: string) => `/hsk-exam/result/${examId}`,
   },
 };
 

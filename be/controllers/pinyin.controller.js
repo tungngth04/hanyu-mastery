@@ -3,7 +3,27 @@ const Pinyin = require('../models/pinyin.model');
 const { buildPinyin } = require('../utils/pinyin');
 const { initialSoundMap } = require('../utils/pinyinSoundMap');
 const { textToSpeech } = require('../utils/tts');
+const uploadToS3 = require('../utils/uploadToS3');
+const gTTS = require('gtts');
+const fs = require('fs');
+const path = require('path');
 
+const audioDir = path.join(__dirname, '../audio/combine');
+
+if (!fs.existsSync(audioDir)) {
+  fs.mkdirSync(audioDir, { recursive: true });
+}
+
+async function createAudio(text, filePath) {
+  const tts = new gTTS(text, 'zh-cn');
+
+  await new Promise((resolve, reject) => {
+    tts.save(filePath, (err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+}
 const getPinyin = async (req, res) => {
   try {
     const data = await Pinyin.findOne();
@@ -23,109 +43,72 @@ const getPinyin = async (req, res) => {
 // ghép + audio
 const combine = async (req, res) => {
   try {
-    const { initial = '', final, tone } = req.body;
+    let { initial = '', final, tone } = req.body;
+    tone = Number(tone);
 
-    if (!final) {
+    if (!final || !tone) {
       return res.status(400).json({
         code: 400,
-        message: 'Thiếu final',
+        message: 'Thiếu final hoặc tone',
       });
     }
 
-    const pinyin = buildPinyin(initial, final, tone);
-    const audio = await textToSpeech(pinyin, `${pinyin}.wav`);
+    const pinyinText = buildPinyin(initial, final, tone);
+
+    if (!pinyinText) {
+      return res.status(500).json({
+        code: 500,
+        message: 'buildPinyin lỗi',
+      });
+    }
+
+    const db = await Pinyin.findOne();
+
+    if (!db) {
+      return res.status(500).json({
+        code: 500,
+        message: 'Không tìm thấy Pinyin DB',
+      });
+    }
+
+    if (db.combinedAudio?.[pinyinText]) {
+      return res.json({
+        code: 200,
+        data: {
+          pinyin: pinyinText,
+          audio: db.combinedAudio[pinyinText],
+        },
+      });
+    }
+
+    const fileName = `combine_${pinyinText}.mp3`;
+    const filePath = path.join(audioDir, fileName);
+
+    await createAudio(pinyinText, filePath);
+    const url = await uploadToS3(filePath, `pinyin/combine/${fileName}`);
+
+    fs.unlinkSync(filePath);
+
+    db.combinedAudio = {
+      ...(db.combinedAudio || {}),
+      [pinyinText]: url,
+    };
+
+    db.markModified('combinedAudio');
+    await db.save();
 
     return res.json({
       code: 200,
       data: {
-        pinyin,
-        audio,
+        pinyin: pinyinText,
+        audio: url,
       },
     });
   } catch (err) {
-    console.error(err);
+    console.error('COMBINE ERROR:', err);
     return res.status(500).json({
       code: 500,
-      message: 'Lỗi combine',
-    });
-  }
-};
-
-// phát âm thanh mẫu
-const speakInitial = async (req, res) => {
-  try {
-    const { initial } = req.body;
-
-    if (!initial) {
-      return res.status(400).json({
-        code: 400,
-        message: 'Thiếu initial',
-      });
-    }
-
-    const text = initialSoundMap[initial] || initial;
-    const audio = await textToSpeech(text, `${initial}.wav`);
-
-    return res.json({
-      code: 200,
-      data: audio,
-    });
-  } catch (err) {
-    return res.status(500).json({
-      code: 500,
-      message: 'Lỗi speakInitial',
-    });
-  }
-};
-
-// phát âm vận mẫu
-const speakFinal = async (req, res) => {
-  try {
-    const { final } = req.body;
-
-    if (!final) {
-      return res.status(400).json({
-        code: 400,
-        message: 'Thiếu final',
-      });
-    }
-
-    const audio = await textToSpeech(final, `${final}.wav`);
-
-    return res.json({
-      code: 200,
-      data: audio,
-    });
-  } catch (err) {
-    return res.status(500).json({
-      code: 500,
-      message: 'Lỗi speakFinal',
-    });
-  }
-};
-
-// phát âm bất kỳ
-const speak = async (req, res) => {
-  try {
-    const { text } = req.body;
-
-    if (!text) {
-      return res.status(400).json({
-        code: 400,
-        message: 'Thiếu text',
-      });
-    }
-
-    const audio = await textToSpeech(text, `${text}.wav`);
-
-    return res.json({
-      code: 200,
-      data: audio,
-    });
-  } catch (err) {
-    return res.status(500).json({
-      code: 500,
-      message: 'Lỗi speak',
+      message: err.message || 'Lỗi combine',
     });
   }
 };
@@ -133,7 +116,4 @@ const speak = async (req, res) => {
 module.exports = {
   getPinyin,
   combine,
-  speakInitial,
-  speakFinal,
-  speak,
 };

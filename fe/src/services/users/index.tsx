@@ -57,3 +57,18 @@ export const changePassword = createAsyncThunk(
     }
   },
 );
+
+export const getLearningStats = createAsyncThunk(
+  "users/getLearningStats",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await RequestMethod.get(
+        apiConstant.users.getLearningStats,
+      );
+
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);

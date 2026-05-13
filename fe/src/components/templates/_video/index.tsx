@@ -17,6 +17,7 @@ import { getAllVideo } from "@/src/services/video";
 import { IVideoItem } from "@/src/types/interface";
 import { Pagination } from "antd";
 import VideoItem from "./components/_video_item";
+import { getHSKExamDetail } from "@/src/services/hsk";
 
 const VideoPage = () => {
   const router = useRouter();
@@ -44,6 +45,10 @@ const VideoPage = () => {
             level: activeLevel,
           }),
         ).unwrap();
+        const response = await dispatch(
+          getHSKExamDetail("6a049cabab0f15638dba94b9"),
+        ).unwrap();
+
         if (isMounted && result) {
           setVideos(result.videos);
           setTotal(result.totalResults);

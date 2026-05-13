@@ -4,17 +4,23 @@ const { status: httpStatus } = require('http-status');
 const ApiError = require('../utils/ApiError');
 
 const getAllTopic = catchAsync(async (req, res) => {
-  const { page = 1, pageSize = 10 } = req.query;
+  const { page = 1, pageSize = 10, search = '' } = req.query;
   const skip = (+page - 1) * +pageSize;
 
+  const filter = {};
+
+  if (search) {
+    filter.name = { $regex: search, $options: 'i' };
+  }
+
   const [topics, total] = await Promise.all([
-    VocabularyTopic.find()
+    VocabularyTopic.find(filter)
       .select('-__v -createdAt -updatedAt')
       .sort({ createdAt: -1 })
       .skip(Number(skip))
       .limit(Number(pageSize)),
 
-    VocabularyTopic.countDocuments(),
+    VocabularyTopic.countDocuments(filter),
   ]);
 
   res.status(200).json({

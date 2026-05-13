@@ -25,6 +25,9 @@ const VocabularyManagement = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  const [search, setSearch] = useState("");
+  const [keyword, setKeyword] = useState("");
+
   const [openAdd, setOpenAdd] = useState(false);
   const [editingVocabulary, setEditingVocabulary] = useState<any>(null);
 
@@ -45,19 +48,21 @@ const VocabularyManagement = () => {
         getAllVocabularies({
           page: pagination.current,
           pageSize: pagination.pageSize,
+          search,
         }),
       ).unwrap();
+      notify("success", "Tải danh sách từ vựng thành công");
 
       setVocabularies(res.vocabularies);
       setTotal(res.totalResults);
     } catch {
-      notify("error", "Không tải được dữ liệu");
+      notify("error", "Không tải được danh sách từ vựng");
     }
   };
 
   useEffect(() => {
     fetchVocabulary();
-  }, [pagination]);
+  }, [pagination, search]);
 
   const columns: ColumnsType<any> = [
     {
@@ -88,6 +93,7 @@ const VocabularyManagement = () => {
       dataIndex: "meaning",
       ellipsis: true,
       width: 250,
+      sorter: (a, b) => a.meaning.localeCompare(b.meaning),
     },
     {
       title: "Ví dụ",
@@ -100,6 +106,7 @@ const VocabularyManagement = () => {
       dataIndex: "exampleMeaning",
       ellipsis: true,
       width: 250,
+      sorter: (a, b) => a.exampleMeaning.localeCompare(b.exampleMeaning),
     },
     {
       title: "HSK",
@@ -113,6 +120,7 @@ const VocabularyManagement = () => {
       dataIndex: "strokeCount",
       width: 80,
       align: "center",
+      sorter: (a, b) => a.strokeCount - b.strokeCount,
     },
     {
       title: "Bộ thủ",
@@ -192,7 +200,7 @@ const VocabularyManagement = () => {
       setEditingVocabulary(null);
       formEdit.resetFields();
     } catch {
-      notify("error", "Cập nhật thất bại");
+      notify("error", "Cập nhật từ vựng thất bại");
     }
   };
 
@@ -208,13 +216,13 @@ const VocabularyManagement = () => {
       onOk: async () => {
         try {
           await dispatch(deleteVocabulary(record._id)).unwrap();
-          notify("success", "Xóa thành công");
+          notify("success", "Xóa từ vựng thành công");
           setVocabularies((prev) =>
             prev.filter((item) => item._id !== record._id),
           );
           setTotal((prev) => prev - 1);
         } catch {
-          notify("error", "Xóa thất bại");
+          notify("error", "Xóa từ vựng thất bại");
         }
       },
     });
@@ -246,7 +254,22 @@ const VocabularyManagement = () => {
       </div>
 
       <div className="w-80">
-        <Input placeholder="Tìm theo hanzi / pinyin..." />
+        <Input
+          placeholder="Tìm theo hanzi / pinyin..."
+          allowClear
+          onChange={(e) => {
+            const value = e.target.value;
+            setKeyword(value);
+
+            if (!value) {
+              setSearch("");
+            }
+          }}
+          onPressEnter={() => {
+            if (!keyword.trim()) return;
+            setSearch(keyword);
+          }}
+        />
       </div>
 
       <Card className="rounded-2xl shadow-sm overflow-hidden">

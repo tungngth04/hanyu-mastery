@@ -28,6 +28,8 @@ const apiConstant = {
     toggleStatus: (id: string) => `/users/toggle-status/${id}`,
     updateProfile: "/users/profile",
     changePassword: "/users/change-password",
+    dashboardOverview: "/users/dashboard/overview",
+    userGrowth: "/users/dashboard/user-growth",
   },
 
   supports: {
@@ -43,6 +45,20 @@ const apiConstant = {
     createUpload: "/videos/upload",
     update: (id: string) => `/videos/${id}`,
     delete: (id: string) => `/videos/${id}`,
+  },
+  flashcardDeck: {
+    getAll: "/flashcard-deck",
+    stats: "/flashcard-deck/stats",
+    create: "/flashcard-deck",
+    update: (id: string) => `/flashcard-deck/${id}`,
+    delete: (id: string) => `/flashcard-deck/${id}`,
+  },
+  grammar: {
+    getAllLessons: "/grammar/lessons",
+    createLesson: "/grammar/lesson",
+    updateLesson: (id: string) => `/grammar/lesson/${id}`,
+    deleteLesson: (id: string) => `/grammar/lesson/${id}`,
+    getAllTopics: "/grammar/grammar-topics",
   },
 };
 

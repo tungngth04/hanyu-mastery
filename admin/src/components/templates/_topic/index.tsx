@@ -3,7 +3,7 @@
 
 import { Edit, Plus, Trash2 } from "lucide-react";
 import { Card } from "../../atoms/card";
-import { Modal, Table, Form, Pagination } from "antd";
+import { Modal, Table, Form, Pagination, Input } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import Button from "../../atoms/button";
 import { useEffect, useState } from "react";
@@ -26,6 +26,9 @@ const TopicManagement = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  const [search, setSearch] = useState("");
+  const [keyword, setKeyword] = useState("");
+
   const [openAdd, setOpenAdd] = useState(false);
   const [editingTopic, setEditingTopic] = useState<any>(null);
 
@@ -45,6 +48,7 @@ const TopicManagement = () => {
         getAllTopics({
           page: pagination.current,
           pageSize: pagination.pageSize,
+          search,
         }),
       ).unwrap();
       notify("success", "Tải danh sách topic thành công");
@@ -57,7 +61,7 @@ const TopicManagement = () => {
 
   useEffect(() => {
     fetchTopics();
-  }, [pagination]);
+  }, [pagination, search]);
 
   const columns: ColumnsType<any> = [
     {
@@ -73,6 +77,7 @@ const TopicManagement = () => {
     {
       title: "Tên chủ đề",
       render: (_, record) => record.name,
+      sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
       title: "Mô tả",
@@ -183,11 +188,31 @@ const TopicManagement = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold">Quản lý Topic</h2>
+        <h2 className="text-3xl font-bold">Quản lý chủ đề</h2>
 
         <Button onClick={() => setOpenAdd(true)} className="cursor-pointer">
-          <Plus size={16} /> Thêm Topic
+          <Plus size={16} /> Thêm chủ đề
         </Button>
+      </div>
+
+      <div className="w-80">
+        <Input
+          placeholder="Tìm theo tên chủ đề ..."
+          value={keyword}
+          allowClear
+          onChange={(e) => {
+            const value = e.target.value;
+            setKeyword(value);
+
+            if (!value) {
+              setSearch("");
+            }
+          }}
+          onPressEnter={() => {
+            if (!keyword.trim()) return;
+            setSearch(keyword);
+          }}
+        />
       </div>
 
       <Card className="rounded-2xl shadow-sm overflow-hidden">

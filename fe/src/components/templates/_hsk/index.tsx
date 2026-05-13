@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import {
   Award,
@@ -8,12 +9,60 @@ import {
 } from "lucide-react";
 import Button from "../../atoms/button";
 import { Card, CardContent } from "../../atoms/card";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAppDispatch } from "@/src/hooks/useHookReducers";
+import { getAllHSKExam } from "@/src/services/hsk";
+import { useQueryParams } from "@/src/hooks/useQueryParams";
+import useNotification from "@/src/hooks/useNotification";
+import { useRouter } from "next/navigation";
+import { Pagination } from "antd";
 
 const HSKPage = () => {
-  const [level, setLevel] = useState("HSK 3");
+  const dispatch = useAppDispatch();
+  const { searchParams, setQuery } = useQueryParams();
+  const { notify } = useNotification();
+  const router = useRouter();
 
-  const levels = ["HSK 1", "HSK 2", "HSK 3", "HSK 4", "HSK 5", "HSK 6"];
+  const [level, setLevel] = useState<string>("Tất cả");
+  const [exams, setExams] = useState<any[]>([]);
+
+  const page = Number(searchParams.get("page") || 1);
+  const pageSize = Number(searchParams.get("pageSize") || 12);
+
+  const [total, setTotal] = useState(0);
+
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const res = await dispatch(
+          getAllHSKExam({
+            page,
+            pageSize,
+            level: levelNumber,
+          }),
+        ).unwrap();
+        setExams(res.exams);
+        setTotal(res.totalResults);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetch();
+  }, [dispatch, page, pageSize, level]);
+
+  const levels = [
+    "Tất cả",
+    "HSK 1",
+    "HSK 2",
+    "HSK 3",
+    "HSK 4",
+    "HSK 5",
+    "HSK 6",
+  ];
+
+  const levelNumber =
+    level === "Tất cả" ? undefined : Number(level.replace("HSK ", ""));
   const statis = [
     {
       label: "15+ Đề thi mỗi cấp",
@@ -40,6 +89,21 @@ const HSKPage = () => {
       bgicon: "bg-purple-100",
     },
   ];
+
+  const handleChangePage = (page: number, pageSize: number) => {
+    setQuery({
+      page,
+      pageSize,
+    });
+  };
+
+  const handleChangePageSize = (_: number, pageSize: number) => {
+    setQuery({
+      page: 1,
+      pageSize,
+    });
+  };
+
   return (
     <div className="py-10 px-10 space-y-8">
       <div className="relative bg-linear-to-r from-slate-900 to-rose-950 p-10 rounded-3xl text-white shadow-xl shadow-slate-900/20 overflow-hidden space-y-2">
@@ -108,7 +172,7 @@ const HSKPage = () => {
                 <p className="text-lg font-bold text-slate-600">
                   Tiến độ luyện đề
                 </p>
-                <p className="text-primary text-lg font-bold">3/15 đề</p>
+                <p className="text-primary text-lg font-bold">0/{total} đề</p>
               </div>
               <div className="bg-rose-200 h-3 w-full rounded-full overflow-hidden">
                 <div
@@ -122,13 +186,11 @@ const HSKPage = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {[1, 2, 3, 4, 5, 6].map((num, index) => (
+        {exams.map((num, index) => (
           <Card key={index}>
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-bold">
-                  Đề thi thử HSK 3 - Bộ {num}
-                </h3>
+                <h3 className="text-lg font-bold">{num.title}</h3>
                 <span
                   className={`py-0.5 px-4 rounded-full text-sm ${num <= 2 ? "bg-green-100 text-green-800" : num === 3 ? "text-orange-600" : "bg-slate-200 text-slate-700"}`}
                 >
@@ -146,18 +208,12 @@ const HSKPage = () => {
               </div>
 
               <div className="grid grid-cols-3 gap-2 text-center text-base">
-                <div className="p-2 bg-slate-50 rounded-xl">
-                  <p className="text-slate-400">Nghe</p>
-                  <p className="font-bold">35/40</p>
-                </div>
-                <div className="p-2 bg-slate-50 rounded-xl">
-                  <p className="text-slate-400">Đọc</p>
-                  <p className="font-bold">32/40</p>
-                </div>
-                <div className="p-2 bg-slate-50 rounded-xl">
-                  <p className="text-slate-400">Viết</p>
-                  <p className="font-bold">20/20</p>
-                </div>
+                {num.sections.map((section: any, idx: number) => (
+                  <div key={idx} className="p-2 bg-slate-50 rounded-xl">
+                    <p className="text-slate-400">{section.name}</p>
+                    <p className="font-bold">0/{section.totalQuestions}</p>
+                  </div>
+                ))}
               </div>
 
               {num <= 2 ? (
@@ -178,7 +234,10 @@ const HSKPage = () => {
                   </button>
                 </div>
               ) : (
-                <Button className="w-full rounded-xl!">
+                <Button
+                  className="w-full rounded-xl!"
+                  onClick={() => router.push(`/hsk/${num._id}`)}
+                >
                   {num === 3 ? "Tiếp tục làm bài" : "Bắt đầu làm bài"}
                 </Button>
               )}
@@ -186,6 +245,15 @@ const HSKPage = () => {
           </Card>
         ))}
       </div>
+      <Pagination
+        align="end"
+        current={page}
+        pageSize={pageSize}
+        total={total}
+        showSizeChanger
+        onChange={handleChangePage}
+        onShowSizeChange={handleChangePageSize}
+      />
     </div>
   );
 };

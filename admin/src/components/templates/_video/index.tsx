@@ -3,7 +3,7 @@
 
 import { Edit, Plus, Trash2 } from "lucide-react";
 import { Card } from "../../atoms/card";
-import { Modal, Tag, Table, Form, Pagination } from "antd";
+import { Modal, Tag, Table, Form, Pagination, Input } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import Button from "../../atoms/button";
 import { useCallback, useEffect, useState } from "react";
@@ -27,6 +27,9 @@ const VideoManagement = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const [search, setSearch] = useState("");
+  const [keyword, setKeyword] = useState("");
+
   const [openAdd, setOpenAdd] = useState(false);
   const [editingVideo, setEditingVideo] = useState<any>(null);
 
@@ -41,12 +44,13 @@ const VideoManagement = () => {
     pageSize: Number(searchParams.get("limit")) || 10,
   });
 
-  const fetchVideos = useCallback(async () => {
+  const fetchVideos = async () => {
     try {
       const res = await dispatch(
         getAllVideos({
           page: pagination.current,
           pageSize: pagination.pageSize,
+          search,
         }),
       ).unwrap();
       notify("success", "Tải danh sách video thành công");
@@ -56,11 +60,11 @@ const VideoManagement = () => {
     } catch {
       notify("error", "Không tải được video");
     }
-  }, [pagination, dispatch]);
+  };
 
   useEffect(() => {
     fetchVideos();
-  }, [pagination]);
+  }, [pagination, search]);
 
   const columns: ColumnsType<any> = [
     {
@@ -94,6 +98,7 @@ const VideoManagement = () => {
       render: (_, record) => (
         <p className=" line-clamp-1 truncate">{record.title || "—"}</p>
       ),
+      sorter: (a, b) => a.title.localeCompare(b.title),
     },
     {
       title: "Mô tả",
@@ -108,11 +113,13 @@ const VideoManagement = () => {
       title: "Level",
       align: "center",
       render: (_, record) => <Tag color="blue">HSK {record.level}</Tag>,
+      sorter: (a, b) => a.level - b.level,
     },
     {
       title: "Lượt xem",
       align: "center",
       render: (_, record) => <span>{record.views}</span>,
+      sorter: (a, b) => a.views - b.views,
     },
     {
       title: "Loại",
@@ -129,6 +136,7 @@ const VideoManagement = () => {
       render: (_, record) => (
         <p className="line-clamp-1">{record.author || "—"}</p>
       ),
+      sorter: (a, b) => a.author.localeCompare(b.author),
     },
     {
       title: "Ngày tạo",
@@ -259,8 +267,7 @@ const VideoManagement = () => {
         try {
           await dispatch(deleteVideo(record._id)).unwrap();
           notify("success", "Xóa thành công");
-          setVideos((prev) => prev.filter((item) => item._id !== record._id));
-          setTotal((prev) => prev - 1);
+          fetchVideos();
         } catch {
           notify("error", "Xóa thất bại");
         }
@@ -291,6 +298,25 @@ const VideoManagement = () => {
         <Button onClick={() => setOpenAdd(true)} className="cursor-pointer">
           <Plus size={16} /> Thêm Video
         </Button>
+      </div>
+
+      <div className="w-80">
+        <Input
+          placeholder="Tìm theo tiêu đề ..."
+          allowClear
+          onChange={(e) => {
+            const value = e.target.value;
+            setKeyword(value);
+
+            if (!value) {
+              setSearch("");
+            }
+          }}
+          onPressEnter={() => {
+            if (!keyword.trim()) return;
+            setSearch(keyword);
+          }}
+        />
       </div>
 
       <Card className="rounded-2xl shadow-sm overflow-hidden">

@@ -4,6 +4,7 @@ const FlashcardDeck = require('../models/flashcardDeck.model');
 const User_Deck_Progress = require('../models/userDeckProgress.model');
 const { formatLastStudied } = require('../helpers/lastStudied');
 const { calculateStreak } = require('../helpers/calculateStreak');
+const ApiError = require('../utils/ApiError');
 
 const getAllFlashcardDeck = catchAsync(async (req, res) => {
   const { pageSize = 10, page = 1, search = '', level } = req.query;
@@ -90,7 +91,6 @@ const getAllFlashcardDeck = catchAsync(async (req, res) => {
         progress: 0,
         __v: 0,
         createdAt: 0,
-        updatedAt: 0,
       },
     },
     {
@@ -192,4 +192,83 @@ const getFlashcardStats = catchAsync(async (req, res) => {
   });
 });
 
-module.exports = { getAllFlashcardDeck, getFlashcardStats };
+const createFlashcardDeck = catchAsync(async (req, res) => {
+  const userId = req.user._id;
+  const { title, topic, level, isSystem } = req.body;
+
+  const deck = await FlashcardDeck.create({
+    title,
+    topic,
+    level,
+    userId,
+    isSystem: req.user.role === 'admin' ? true : false,
+  });
+
+  res.status(httpStatus.CREATED).json({
+    code: httpStatus.CREATED,
+    message: 'Tạo flashcard deck thành công',
+    data: deck,
+  });
+});
+
+const updateFlashcardDeck = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user._id;
+
+  const deck = await FlashcardDeck.findById(id);
+
+  if (!deck) {
+    throw new ApiError(404, 'Không tìm thấy deck');
+  }
+
+  // check quyền
+  if (deck.userId.toString() !== userId.toString() && !req.user.isAdmin) {
+    throw new ApiError(403, 'Không có quyền chỉnh sửa');
+  }
+
+  // chỉ lấy 3 field cần update
+  const { title, topic, level } = req.body;
+
+  deck.title = title ?? deck.title;
+  deck.topic = topic ?? deck.topic;
+  deck.level = level ?? deck.level;
+
+  await deck.save();
+
+  res.status(200).json({
+    code: 200,
+    message: 'Cập nhật deck thành công',
+    data: deck,
+  });
+});
+
+const deleteFlashcardDeck = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user._id;
+
+  const deck = await FlashcardDeck.findById(id);
+
+  if (!deck) {
+    throw new ApiError(404, 'Không tìm thấy deck');
+  }
+
+  // chỉ owner hoặc admin mới xoá
+  if (deck.userId.toString() !== userId.toString() && !req.user.isAdmin) {
+    throw new ApiError(403, 'Không có quyền xoá');
+  }
+
+  await deck.deleteOne();
+
+  res.status(200).json({
+    code: 200,
+    message: 'Xoá deck thành công',
+  });
+});
+
+module.exports = {
+  getAllFlashcardDeck,
+  getFlashcardStats,
+  createFlashcardDeck,
+  updateFlashcardDeck,
+  deleteFlashcardDeck,
+};

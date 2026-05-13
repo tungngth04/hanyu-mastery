@@ -26,5 +26,4 @@ const generateDailyVocabulary = async () => {
 
   console.log('Created daily vocab:', today);
 };
-
 module.exports = generateDailyVocabulary;

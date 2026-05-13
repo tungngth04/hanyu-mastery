@@ -209,5 +209,5 @@ router.get('/daily', controller.getDailyVocabulary);
 router.post('/', auth, author(['admin']), middleware(validate.createVocabulary), controller.createVocabulary);
 router.patch('/:id', auth, author(['admin']), middleware(validate.updateVocabulary), controller.updateVocabulary);
 router.delete('/:id', auth, author(['admin']), middleware(validate.deleteVocabulary), controller.deleteVocabulary);
-
+router.post('/add', auth, controller.addVocabularyToFlashcard);
 module.exports = router;

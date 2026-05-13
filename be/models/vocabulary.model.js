@@ -17,7 +17,7 @@ const vocabularySchema = new mongoose.Schema(
 
     level: Number,
 
-    strokeCount: Number,
+    strokeCount: String,
 
     radical: String,
 

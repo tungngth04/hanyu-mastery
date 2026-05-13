@@ -20,14 +20,23 @@ const createSupportRequest = catchAsync(async (req, res) => {
 });
 
 const getAllSupportRequests = catchAsync(async (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit = 10, search = '' } = req.query;
 
   const skip = (page - 1) * limit;
 
-  const [supports, total] = await Promise.all([
-    Support.find().sort({ createdAt: -1 }).skip(Number(skip)).limit(Number(limit)),
+  const filter = {};
+  if (search) {
+    filter.$or = [
+      { fullName: { $regex: search, $options: 'i' } },
+      { email: { $regex: search, $options: 'i' } },
+      { subject: { $regex: search, $options: 'i' } },
+    ];
+  }
 
-    Support.countDocuments(),
+  const [supports, total] = await Promise.all([
+    Support.find(filter).sort({ createdAt: -1 }).skip(Number(skip)).limit(Number(limit)),
+
+    Support.countDocuments(filter),
   ]);
 
   res.status(200).json({

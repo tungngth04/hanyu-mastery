@@ -35,10 +35,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }: HeaderProps) => {
     router.push("/");
     notify("success", "Đăng xuất thành công");
   };
-  const avatar =
-    userInfor?.avatar && userInfor.avatar !== "null"
-      ? userInfor.avatar
-      : "https://i.pravatar.cc/100";
+  const avatar = userInfor?.avatar || "https://i.pravatar.cc/100";
   return (
     <header className="fixed top-0 left-64 right-0 h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 z-50">
       <div className="flex items-center gap-4">

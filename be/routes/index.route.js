@@ -51,6 +51,18 @@ const listRoutesApi = [
     path: '/pinyin',
     route: require('./pinyin.route'),
   },
+  {
+    path: '/grammar',
+    route: require('./grammar.route'),
+  },
+  {
+    path: '/hsk-exam',
+    route: require('./hskExam.route'),
+  },
+  {
+    path: '/hsk-exam-result',
+    route: require('./hskExamResult.route'),
+  },
 ];
 
 listRoutesApi.forEach((route) => {

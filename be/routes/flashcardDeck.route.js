@@ -94,5 +94,8 @@ const { auth } = require('../middlewares/auth.middleware');
 
 router.get('/', auth, middleware(validate.getAllFlashcardDeck), controller.getAllFlashcardDeck);
 router.get('/stats', auth, controller.getFlashcardStats);
+router.post('/', auth, controller.createFlashcardDeck);
+router.patch('/:id', auth, controller.updateFlashcardDeck);
+router.delete('/:id', auth, controller.deleteFlashcardDeck);
 
 module.exports = router;

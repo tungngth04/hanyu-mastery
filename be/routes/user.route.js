@@ -292,5 +292,7 @@ router.patch('/change-password', auth, middleware(validate.changePassword), cont
 router.get('/all', auth, author(['admin']), controller.getAllUsers);
 router.get('/detail/:id', auth, author(['admin']), controller.getUserDetail);
 router.patch('/toggle-status/:id', auth, author(['admin']), controller.toggleUserStatus);
-
+router.get('/dashboard/overview', auth, author(['admin']), controller.getDashboardOverview);
+router.get('/dashboard/user-growth', auth, author(['admin']), controller.getUserGrowth);
+router.get('/dashboard/learning-stats', auth, controller.getLearningStats);
 module.exports = router;

@@ -12,12 +12,12 @@ const Banner = () => {
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <div className="space-y-8 relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-bold slide-left">
-            <Zap size={14} /> Nền tảng học tiếng Trung số 1 Việt Nam
+            <Zap size={14} /> Nền tảng học tiếng Trung
           </div>
           <h1 className="text-5xl lg:text-7xl font-black text-slate-900 leading-[1.1] slide-up delay-100">
-            Chinh phục <span className="text-primary italic">Tiếng Trung</span>{" "}
-            <br />
-            Theo cách thông minh nhất.
+            Cùng nhau chinh phục{" "}
+            <span className="text-primary italic">Tiếng Trung</span> <br />
+            theo cách thông minh nhất
           </h1>
           <p className="text-xl text-slate-500 max-w-lg zoom-in delay-200">
             Từ vựng chủ đề, flashcard AI, luyện phát âm chuẩn và lộ trình HSK cá

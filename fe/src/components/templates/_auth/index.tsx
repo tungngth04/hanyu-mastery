@@ -78,8 +78,8 @@ const AuthPage = () => {
       <div className="hidden lg:flex flex-col items-center justify-center p-12 text-white relative overflow-hidden bg-linear-to-br from-purple-900 via-slate-900 to-blue-950">
         <div className="relative z-10 max-w-md text-center space-y-8">
           <h2 className="text-4xl font-black leading-tight">
-            Học Tiếng Trung <br />
-            <span className="text-primary italic">Thật Đơn Giản</span>
+            HỌC TIẾNG TRUNG <br />
+            <span className="text-primary italic">THẬT ĐƠN GIẢN</span>
           </h2>
           <p className="text-slate-300 text-xl">
             Tham gia cùng cộng đồng 10.000+ học viên đang chinh phục HSK mỗi

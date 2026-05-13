@@ -1,16 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import apiConstant from "@/src/constants/api.constant";
 import { RequestMethod } from "@/src/hooks/useHookReducers";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const getAllSupport = createAsyncThunk(
   "support/getAll",
-  async (params: { page: number; limit: number }, { rejectWithValue }) => {
+  async (params: any, { rejectWithValue }) => {
     try {
       const res = await RequestMethod.get(apiConstant.supports.getAll, {
-        params: {
-          page: params.page,
-          limit: params.limit,
-        },
+        params,
       });
 
       return res.data.data;

@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { Bookmark, Clock, MessageCircle, Plus, ThumbsUp } from "lucide-react";
+import { Bookmark, Clock, MessageCircle, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
@@ -35,15 +36,11 @@ const VideoDetail = () => {
   const [showNote, setShowNote] = useState(true);
   const [videoSave, setVideoSave] = useState(false);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [comments, setComments] = useState<any[]>([]);
   const [commentInput, setCommentInput] = useState("");
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const playerRef = useRef<any>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-
-  const { userInfor } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -289,7 +286,7 @@ const VideoDetail = () => {
 
               <div className="flex gap-3 items-start w-full">
                 <Image
-                  src={userInfor?.avatar || "https://i.pravatar.cc/40"}
+                  src={"https://i.pravatar.cc/40"}
                   alt="avatar"
                   width={40}
                   height={40}
@@ -322,7 +319,7 @@ const VideoDetail = () => {
                 {comments.map((item, index) => (
                   <div key={index} className="flex gap-3 items-start">
                     <Image
-                      src={item.userId.avatar || "https://i.pravatar.cc/40"}
+                      src={"https://i.pravatar.cc/40"}
                       alt={item.name}
                       width={40}
                       height={40}

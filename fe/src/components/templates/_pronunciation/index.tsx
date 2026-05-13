@@ -1,71 +1,72 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "../../atoms/card";
-import { CheckCircle2, Info, Mic, Play, Volume2 } from "lucide-react";
+import {
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Info,
+  Mic,
+  Play,
+  Volume2,
+} from "lucide-react";
 import Button from "../../atoms/button";
 import { useAppDispatch } from "@/src/hooks/useHookReducers";
-import { uploadPronunciation } from "@/src/services/pronunciation";
-import { IPronunciationResult } from "@/src/types/interface";
+import {
+  combinePinyin,
+  getPinyin,
+  uploadPronunciation,
+} from "@/src/services/pronunciation";
+import { IPronunciationResult, IVocabulary } from "@/src/types/interface";
+import { getDaily } from "@/src/services/vocabulary";
+import useNotification from "@/src/hooks/useNotification";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ResponsiveContainer,
+} from "recharts";
 
+type ChartRow = {
+  time: number;
+  [key: string]: number;
+};
+
+type PinyinData = {
+  initials: string[];
+  finals: string[];
+  tones: {
+    id: number;
+    mark: string;
+    name: string;
+    desc: string;
+    _id: string;
+  }[];
+
+  initialAudio: Record<string, string>;
+  finalAudio: Record<string, string>;
+  toneAudio: Record<string, string>;
+};
 const PronunciationPage = () => {
   const [level, setLevel] = useState("Luyện tập");
   const [recording, setRecording] = useState(false);
   const dispatch = useAppDispatch();
+  const { notify } = useNotification();
 
   const [resultScore, setResultScore] = useState<IPronunciationResult | null>(
     null,
   );
+  const [vocabulary, setVocabulary] = useState<IVocabulary[]>([]);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<BlobPart[]>([]);
 
-  const levels = ["Luyện tập", "Bảng Pinyin"];
-  const initials = [
-    "b",
-    "p",
-    "m",
-    "f",
-    "d",
-    "t",
-    "n",
-    "l",
-    "g",
-    "k",
-    "h",
-    "j",
-    "q",
-    "x",
-    "zh",
-    "ch",
-    "sh",
-    "r",
-    "z",
-    "c",
-    "s",
-    "y",
-    "w",
-  ];
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const currentWord = vocabulary[currentIndex];
 
-  const tones = [
-    { id: 1, mark: "ā", name: "Thanh 1", desc: "Cao và ngang" },
-    {
-      id: 2,
-      mark: "á",
-      name: "Thanh 2",
-      desc: "Từ thấp lên cao (như dấu sắc)",
-    },
-    {
-      id: 3,
-      mark: "ǎ",
-      name: "Thanh 3",
-      desc: "Xuống thấp rồi lên cao (như dấu hỏi)",
-    },
-    {
-      id: 4,
-      mark: "à",
-      name: "Thanh 4",
-      desc: "Từ cao xuống thấp (như dấu nặng)",
-    },
-  ];
+  const levels = ["Luyện tập", "Bảng Pinyin"];
 
   const getScoreMeta = (score?: number) => {
     if (!score && score !== 0) {
@@ -147,10 +148,9 @@ const PronunciationPage = () => {
 
       try {
         const result = await dispatch(
-          uploadPronunciation({ audio: blob, text: "你好" }),
+          uploadPronunciation({ audio: blob, text: currentWord?.hanzi }),
         ).unwrap();
         setResultScore(result);
-        console.log("RESULT:", result);
       } catch (error) {
         console.error("Upload thất bại:", error);
       }
@@ -174,17 +174,159 @@ const PronunciationPage = () => {
       startRecording();
     }
   };
+
   const phonemeList = resultScore?.phonemes?.[0]?.phonemes || [];
-  console.log("ádasdas", resultScore);
+
+  const makeCurve = (value: number): number[] => [
+    value - 8,
+    value + 6,
+    value + 2,
+    value,
+  ];
+
+  const chartData: ChartRow[] = [0, 1, 2, 3].map((t) => {
+    const row: ChartRow = { time: t };
+
+    phonemeList.forEach((p) => {
+      const key = p.phoneme;
+      const curve = makeCurve(p.accuracy);
+      row[key] = curve[t];
+    });
+
+    return row;
+  });
+
+  useEffect(() => {
+    const loadListTopic = async () => {
+      try {
+        const res = await dispatch(getDaily()).unwrap();
+        setVocabulary(res);
+
+        notify("success", "Lấy dữ liệu thành công");
+      } catch (error) {
+        notify("error", "Lỗi không thể lấy danh sách từ vựng theo ngày");
+      }
+    };
+
+    loadListTopic();
+  }, []);
+
+  const handlePrev = () => {
+    setCurrentIndex((prev) => (prev === 0 ? vocabulary.length - 1 : prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev === vocabulary.length - 1 ? 0 : prev + 1));
+  };
+
+  const handlePlayAudio = () => {
+    if (!currentWord?.audio) return;
+
+    const audio = new Audio(currentWord.audio);
+    audio.play().catch((err) => {
+      console.error("Không phát được audio:", err);
+    });
+  };
+
+  const handlePlaySlow = () => {
+    if (!currentWord?.audio) return;
+
+    const audio = new Audio(currentWord.audio);
+    audio.playbackRate = 0.6;
+    audio.play().catch((err) => {
+      console.error("Không phát chậm được audio:", err);
+    });
+  };
+
+  // Bảng Pinyin
+  const [piyin, setPiyin] = useState<PinyinData>({
+    initials: [],
+    finals: [],
+    tones: [],
+    initialAudio: {},
+    finalAudio: {},
+    toneAudio: {},
+  });
+
+  useEffect(() => {
+    const loadListTopic = async () => {
+      try {
+        const res = await dispatch(getPinyin()).unwrap();
+        setPiyin(res);
+
+        notify("success", "Lấy dữ liệu thành công");
+      } catch (error) {
+        notify("error", "Lỗi không thể lấy danh sách từ vựng theo ngày");
+      }
+    };
+
+    loadListTopic();
+  }, []);
+
+  const [selectedInitial, setSelectedInitial] = useState<string | null>(null);
+  const [selectedFinal, setSelectedFinal] = useState<string | null>(null);
+  const [selectedTone, setSelectedTone] = useState<number | null>(null);
+  const [combinedPinyin, setCombinedPinyin] = useState("");
+  const [combinedAudio, setCombinedAudio] = useState("");
+  const [isCombining, setIsCombining] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const handleCombine = async () => {
+      if (!selectedFinal || !selectedTone) return;
+
+      try {
+        setIsCombining(true);
+
+        const res = await dispatch(
+          combinePinyin({
+            initial: selectedInitial || "",
+            final: selectedFinal,
+            tone: selectedTone,
+          }),
+        ).unwrap();
+
+        if (!res) return;
+
+        setCombinedPinyin(res.pinyin);
+        setCombinedAudio(res.audio);
+      } catch (err) {
+        console.error("Combine lỗi:", err);
+      } finally {
+        setTimeout(() => setIsCombining(false), 300);
+      }
+    };
+
+    handleCombine();
+  }, [selectedInitial, selectedFinal, selectedTone]);
+
+  const playAudio = (url?: string, rate = 1) => {
+    if (!url) return;
+
+    // dừng audio cũ
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+
+    const audio = new Audio(url);
+    audio.playbackRate = rate;
+
+    audioRef.current = audio;
+
+    audio.play().catch((err) => {
+      console.error("Play error:", err);
+    });
+  };
   return (
     <div className="px-2 py-10 md:px-10">
       <div>
         <h1 className="text-3xl font-bold text-slate-900">
           Luyện phát âm chuẩn
         </h1>
-        <p className="text-slate-500 mt-2">
+        <p className="text-slate-500 mt-2 mb-2">
           Học cách phát âm Pinyin và luyện tập với công nghệ nhận diện giọng nói
-          AI.
+          AI
         </p>
       </div>
 
@@ -207,27 +349,45 @@ const PronunciationPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 slide-up">
           <Card>
             <CardContent className="flex flex-col justify-center items-center space-y-6">
-              <div className="flex flex-col justify-center items-center space-y-2">
-                <span className="bg-rose-100 hover:bg-rose-300 text-primary/80 py-0.5 px-4 rounded-full">
-                  Từ vựng hôm nay
-                </span>
-                <h2 className="text-7xl font-chinese font-bold text-slate-900 tracking-wider">
-                  漂亮
+              <div className="flex flex-col justify-center items-center space-y-2 w-full">
+                <div className="flex justify-between items-center w-full mb-2">
+                  <button
+                    className="text-slate-400 hover:text-primary cursor-pointer"
+                    onClick={handlePrev}
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                  <span className="bg-rose-100 hover:bg-rose-300 text-primary/80 py-0.5 px-4 rounded-full">
+                    Từ vựng {currentIndex + 1}/{vocabulary.length}
+                  </span>
+                  <button
+                    className="text-slate-400 hover:text-primary cursor-pointer"
+                    onClick={handleNext}
+                  >
+                    <ChevronRight size={24} />
+                  </button>
+                </div>
+                <h2 className="text-7xl font-chinese font-bold text-slate-900 tracking-wider mt-2 ">
+                  {currentWord?.hanzi || "--"}
                 </h2>
                 <p className="text-2xl font-medium text-slate-500">
-                  piào liang
+                  {currentWord?.pinyin || "--"}
                 </p>
-                <p className="text-slate-600 font-medium">Xinh đẹp / Đẹp</p>
+                <p className="text-slate-600 font-medium">
+                  {currentWord?.meaning || "--"}
+                </p>
               </div>
 
               <div className="flex gap-4">
                 <Button
+                  onClick={handlePlayAudio}
                   className="rounded-full! w-14 h-14 p-0 bg-white border  border-slate-300 text-primary! hover:bg-slate-200! transition-all flex justify-center items-center shadow-slate-400/30! hover:scale-110"
                   title="Nghe âm thanh chuẩn"
                 >
                   <Volume2 size={20} />
                 </Button>
                 <Button
+                  onClick={handlePlaySlow}
                   className="rounded-full! w-14 h-14 p-0 bg-white border  border-slate-300 text-gray-900! hover:bg-slate-200! transition-all flex justify-center items-center shadow-slate-400/30! hover:scale-110"
                   title="Phát từ chậm"
                 >
@@ -331,12 +491,37 @@ const PronunciationPage = () => {
                     <Info size={20} className="text-slate-400" />
                   </h3>
                 </div>
+
+                <div className="w-full h-[250px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="time" />
+                      <YAxis domain={[0, 100]} />
+                      <Tooltip />
+
+                      {phonemeList.map((p, i) => (
+                        <Line
+                          key={p._id}
+                          type="monotone"
+                          dataKey={p.phoneme}
+                          stroke={
+                            ["#ef4444", "#3b82f6", "#22c55e", "#a855f7"][i % 4]
+                          }
+                          strokeWidth={3}
+                          dot={{ r: 4 }}
+                        />
+                      ))}
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
           </div>
         </div>
       )}
 
+      {/* Bảng Pinyin */}
       {level === "Bảng Pinyin" && (
         <div className="slide-up">
           <Card>
@@ -346,10 +531,65 @@ const PronunciationPage = () => {
                   Thanh mẫu (Phụ âm)
                 </h3>
                 <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
-                  {initials.map((item, index) => (
+                  {piyin.initials.map((item, index) => (
                     <button
                       key={index}
-                      className="h-12 border text-base font-bold hover:border-primary hover:text-primary hover:bg-primary/5 rounded-xl border-slate-200 cursor-pointer group"
+                      onClick={async () => {
+                        try {
+                          const audioUrl = piyin?.initialAudio?.[item];
+
+                          if (audioUrl) {
+                            playAudio(audioUrl);
+                          }
+
+                          setSelectedInitial((prev) =>
+                            prev === item ? null : item,
+                          );
+                        } catch (err) {
+                          console.error(err);
+                        }
+                      }}
+                      className={`h-12 border text-base font-bold hover:border-primary hover:text-primary hover:bg-primary/5 rounded-xl ${
+                        selectedInitial === item
+                          ? "bg-primary text-white border-primary"
+                          : "border-slate-200"
+                      } cursor-pointer group`}
+                    >
+                      <span>{item}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="font-bold text-xl text-slate-900">
+                  Vận mẫu (Nguyên âm)
+                </h3>
+                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
+                  {piyin.finals.map((item, index) => (
+                    <button
+                      key={index}
+                      onClick={async () => {
+                        try {
+                          const audioUrl = piyin?.finalAudio?.[item];
+
+                          if (audioUrl) {
+                            playAudio(audioUrl);
+                          }
+
+                          setSelectedFinal((prev) =>
+                            prev === item ? null : item,
+                          );
+                        } catch (err) {
+                          console.error(err);
+                        }
+                      }}
+                      className={`h-12 border text-base font-bold rounded-xl cursor-pointer
+      ${
+        selectedFinal === item
+          ? "bg-primary text-white border-primary"
+          : "border-slate-200 hover:border-primary hover:text-primary"
+      }`}
                     >
                       <span>{item}</span>
                     </button>
@@ -362,14 +602,42 @@ const PronunciationPage = () => {
                   4 Thanh điệu cơ bản
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
-                  {tones.map((item, index) => (
+                  {piyin?.tones.map((item, index) => (
                     <Card key={index} className="hover:border-primary!">
-                      <CardContent className="group cursor-pointer ">
+                      <CardContent
+                        className={`group cursor-pointer ${
+                          selectedTone === item.id
+                            ? "border-primary bg-primary/10"
+                            : "hover:border-primary"
+                        } `}
+                        onClick={async () => {
+                          try {
+                            setSelectedTone((prev) =>
+                              prev === item.id ? null : item.id,
+                            );
+                          } catch (err) {
+                            console.error(err);
+                          }
+                        }}
+                      >
                         <div className="flex justify-between items-center">
                           <span className="text-sm font-bold text-slate-400 ">
                             {item.name}
                           </span>
-                          <span className="h-8 w-8 text-primary opacity-0 group-hover:opacity-100 transition-opacity flex justify-center items-center">
+                          <span
+                            className="h-8 w-8 text-primary opacity-0 group-hover:opacity-100 transition-opacity flex justify-center items-center"
+                            onClick={async () => {
+                              try {
+                                const audioUrl = piyin?.toneAudio?.[item.id];
+
+                                if (audioUrl) {
+                                  playAudio(audioUrl);
+                                }
+                              } catch (err) {
+                                console.error(err);
+                              }
+                            }}
+                          >
                             <Volume2 size={18} />
                           </span>
                         </div>
@@ -384,6 +652,30 @@ const PronunciationPage = () => {
                       </CardContent>
                     </Card>
                   ))}
+                </div>
+                <div>
+                  {combinedPinyin && (
+                    <div className="flex gap-8 text-left mt-6 space-y-3">
+                      <p className="text-2xl text-slate-500">Kết quả ghép:</p>
+
+                      {/* <div className="flex  gap-4"> */}
+                      <p className="text-3xl font-bold text-primary">
+                        {combinedPinyin}
+                      </p>
+
+                      <button
+                        onClick={() => {
+                          if (!combinedAudio) return;
+
+                          playAudio(combinedAudio);
+                        }}
+                        className="px-4  bg-primary  text-white rounded-lg flex items-center gap-2"
+                      >
+                        <Volume2 size={18} /> Nghe lại
+                      </button>
+                      {/* </div> */}
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>

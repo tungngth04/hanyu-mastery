@@ -3,6 +3,11 @@ const catchAsync = require('../utils/catchAsync');
 const ApiError = require('../utils/ApiError');
 const { status: httpStatus } = require('http-status');
 const cloudinary = require('../config/cloudinary');
+const Vocabulary = require('../models/vocabulary.model');
+const Video = require('../models/video.model');
+const { calculateStreak } = require('../helpers/calculateStreak');
+const UserGrammarProgress = require('../models/userGrammarProgress.model');
+const User_Deck_Progress = require('../models/userDeckProgress.model');
 
 const updateNotification = catchAsync(async (req, res) => {
   const { notification } = req.body;
@@ -69,11 +74,32 @@ const changePassword = catchAsync(async (req, res) => {
 });
 
 const getAllUsers = catchAsync(async (req, res) => {
-  const users = await User.find({ deleted: false }).select('-password');
+  const { page = 1, limit = 10, search = '' } = req.query;
+
+  const skip = (+page - 1) * +limit;
+
+  const filter = {
+    deleted: false,
+  };
+
+  if (search) {
+    filter.$or = [{ fullName: { $regex: search, $options: 'i' } }, { email: { $regex: search, $options: 'i' } }];
+  }
+
+  const [users, total] = await Promise.all([
+    User.find(filter).select('-password').skip(skip).limit(+limit).sort({ createdAt: 1 }),
+
+    User.countDocuments(filter),
+  ]);
 
   res.status(httpStatus.OK).json({
     message: 'Lấy danh sách người dùng thành công',
-    data: { users },
+    data: {
+      users,
+      total,
+      page: +page,
+      limit: +limit,
+    },
   });
 });
 
@@ -114,6 +140,83 @@ const toggleUserStatus = catchAsync(async (req, res) => {
   });
 });
 
+const getDashboardOverview = catchAsync(async (req, res) => {
+  const [totalUsers, totalVocabulary, totalVideos, totalExams] = await Promise.all([
+    User.countDocuments({ deleted: false }),
+    Vocabulary.countDocuments(),
+    Video.countDocuments(),
+    // Exam.countDocuments(),
+  ]);
+
+  res.status(200).json({
+    message: 'Lấy tổng quan thành công',
+    data: {
+      totalUsers,
+      totalVocabulary,
+      totalVideos,
+      // totalExams,
+    },
+  });
+});
+
+const getUserGrowth = catchAsync(async (req, res) => {
+  const days = 7;
+
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days);
+
+  const data = await User.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: startDate },
+        deleted: false,
+      },
+    },
+    {
+      $group: {
+        _id: {
+          $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
+        },
+        count: { $sum: 1 },
+      },
+    },
+    { $sort: { _id: 1 } },
+  ]);
+
+  res.status(200).json({
+    message: 'Lấy biểu đồ thành công',
+    data,
+  });
+});
+
+function formatStudyTime(minutes = 0) {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+
+  if (h === 0) return `${m}m`;
+  return `${h}h ${m}m`;
+}
+
+const getLearningStats = catchAsync(async (req, res) => {
+  const userId = req.user._id;
+
+  const progressList = await UserGrammarProgress.find({ userId }).lean();
+
+  const completedLessons = progressList.filter((p) => p.isCompleted).length;
+
+  const totalStudyMinutes = completedLessons * 12;
+
+  const studyTime = formatStudyTime(totalStudyMinutes);
+
+  res.status(httpStatus.OK).json({
+    code: 200,
+    message: 'Lấy thống kê học tập thành công',
+    data: {
+      studyTime,
+    },
+  });
+});
+
 module.exports = {
   updateNotification,
   updateProfile,
@@ -121,4 +224,7 @@ module.exports = {
   getAllUsers,
   getUserDetail,
   toggleUserStatus,
+  getDashboardOverview,
+  getUserGrowth,
+  getLearningStats,
 };

@@ -155,3 +155,37 @@ body {
 .zoom-in {
   opacity: 0;
 }
+
+@layer components {
+  .grammar-content {
+    @apply text-slate-700 text-[17px] leading-8;
+  }
+
+  .grammar-content h1 {
+    @apply text-5xl font-bold text-red-500 mb-6;
+  }
+
+  .grammar-content h2 {
+    @apply text-2xl font-bold mt-8 mb-4;
+  }
+
+  .grammar-content p {
+    @apply mb-4;
+  }
+
+  .grammar-content ul {
+    @apply list-disc pl-6 space-y-2 mb-4;
+  }
+
+  .grammar-content li {
+    @apply leading-8;
+  }
+
+  .grammar-content blockquote {
+    @apply border-l-4 border-amber-400 bg-amber-50 px-5 py-4 rounded-r-xl my-6;
+  }
+}
+
+.ant-btn-primary {
+  background-color: #db0015;
+}

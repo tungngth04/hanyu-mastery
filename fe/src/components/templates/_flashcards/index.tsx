@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "../../atoms/card";
@@ -16,11 +17,14 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/src/hooks/useHookReducers";
 import useNotification from "@/src/hooks/useNotification";
 import {
+  createFlashcardDeck,
   getAllFlashCardDeck,
   getFlashcardStats,
 } from "@/src/services/flashCardDeck";
 import { IFlashCardDeckItem } from "@/src/types/interface";
 import { Pagination } from "antd";
+import { Formik, Form, Field } from "formik";
+import DialogComponent from "../../atoms/dialog";
 
 function FlashcardsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,6 +47,9 @@ function FlashcardsPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { notify } = useNotification();
+
+  const [openCreate, setOpenCreate] = useState(false);
+
   const levels = [
     "Tất cả",
     "HSK 1",
@@ -99,43 +106,37 @@ function FlashcardsPage() {
 
   const icons = ["📘", "🍜", "✈️", "💼", "💰", "🎋"];
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchData = async () => {
-      try {
-        const result = await dispatch(
-          getAllFlashCardDeck({
-            page,
-            pageSize,
-            search,
-            level: activeLevel,
+  const fetchData = async () => {
+    try {
+      const result = await dispatch(
+        getAllFlashCardDeck({
+          page,
+          pageSize,
+          search,
+          level: activeLevel,
+        }),
+      ).unwrap();
+      if (result) {
+        const decksWithRandomStyle = result.flashcardDecks.map(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (deck: any) => ({
+            ...deck,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            icon: icons[Math.floor(Math.random() * icons.length)],
           }),
-        ).unwrap();
-        if (isMounted && result) {
-          const decksWithRandomStyle = result.flashcardDecks.map(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (deck: any) => ({
-              ...deck,
-              color: colors[Math.floor(Math.random() * colors.length)],
-              icon: icons[Math.floor(Math.random() * icons.length)],
-            }),
-          );
+        );
 
-          setFlashCardDecks(decksWithRandomStyle);
-          setTotal(result.totalResults);
-          notify("success", "Lấy dữ liệu thành công");
-        }
-      } catch (error) {
-        console.log(error);
+        setFlashCardDecks(decksWithRandomStyle);
+        setTotal(result.totalResults);
+        notify("success", "Lấy dữ liệu thành công");
       }
-    };
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
-
-    return () => {
-      isMounted = false;
-    };
   }, [page, pageSize, search, activeLevel]);
 
   useEffect(() => {
@@ -218,19 +219,28 @@ function FlashcardsPage() {
           )}
         </div>
 
-        <div className="flex overflow-x-auto pb-2 gap-2 scrollbar-hide">
-          {levels.map((item, index) => (
-            <Button
-              key={index}
-              className={`rounded-full! whitespace-nowrap shrink-0 px-4 py-2 text-sm ${activeLevel === item ? "bg-red-500 text-white shadow-md shadow-red-200 " : "bg-white text-gray-700! hover:bg-primary/70! border border-slate-200 shadow-none! hover:text-white!"}`}
-              onClick={() => {
-                setActiveLevel(item);
-                setPage(1);
-              }}
-            >
-              {item}
-            </Button>
-          ))}
+        <div className="flex justify-between overflow-x-auto pb-2 gap-2 scrollbar-hide">
+          <div className="flex overflow-x-auto pb-2 gap-2 scrollbar-hide">
+            {levels.map((item, index) => (
+              <Button
+                key={index}
+                className={`rounded-full! whitespace-nowrap shrink-0 px-4 py-2 text-sm ${activeLevel === item ? "bg-red-500 text-white shadow-md shadow-red-200 " : "bg-white text-gray-700! hover:bg-primary/70! border border-slate-200 shadow-none! hover:text-white!"}`}
+                onClick={() => {
+                  setActiveLevel(item);
+                  setPage(1);
+                }}
+              >
+                {item}
+              </Button>
+            ))}
+          </div>
+
+          <Button
+            onClick={() => setOpenCreate(true)}
+            className="rounded-full! w-30 px-4 py-2 text-sm bg-black text-white"
+          >
+            Thêm deck
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -304,6 +314,83 @@ function FlashcardsPage() {
           onShowSizeChange={handleChangePageSize}
         />
       </div>
+
+      <DialogComponent
+        open={openCreate}
+        title="Tạo flashcard deck"
+        onCancel={() => setOpenCreate(false)}
+        submitFormId="createDeckForm"
+      >
+        <Formik
+          initialValues={{
+            title: "",
+            topic: "",
+            level: 1,
+          }}
+          onSubmit={async (values, { resetForm }) => {
+            try {
+              await dispatch(
+                createFlashcardDeck({
+                  ...values,
+                }),
+              ).unwrap();
+
+              notify("success", "Tạo deck thành công");
+
+              resetForm();
+              setOpenCreate(false);
+
+              fetchData();
+            } catch (err: any) {
+              notify("error", err.message || "Tạo thất bại");
+            }
+          }}
+        >
+          {({ handleSubmit }) => (
+            <Form
+              id="createDeckForm"
+              onSubmit={handleSubmit}
+              className="space-y-4"
+            >
+              {/* Title */}
+              <div>
+                <label className="text-sm">Tên deck</label>
+                <Field
+                  name="title"
+                  className="w-full border p-2 rounded-xl mt-1"
+                  placeholder="VD: Từ vựng HSK 1"
+                />
+              </div>
+
+              {/* Topic */}
+              <div>
+                <label className="text-sm">Chủ đề</label>
+                <Field
+                  name="topic"
+                  className="w-full border p-2 rounded-xl mt-1"
+                  placeholder="VD: Gia đình, công việc..."
+                />
+              </div>
+
+              {/* Level */}
+              <div>
+                <label className="text-sm">Level</label>
+                <Field
+                  as="select"
+                  name="level"
+                  className="w-full border p-2 rounded-xl mt-1"
+                >
+                  {[1, 2, 3, 4, 5, 6].map((lvl) => (
+                    <option key={lvl} value={lvl}>
+                      HSK {lvl}
+                    </option>
+                  ))}
+                </Field>
+              </div>
+            </Form>
+          )}
+        </Formik>
+      </DialogComponent>
     </>
   );
 }

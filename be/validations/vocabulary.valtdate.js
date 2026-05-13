@@ -7,6 +7,8 @@ const getAllVocabulary = {
     sortBy: joi.string().optional(),
     pageSize: joi.number().integer().min(1).default(10),
     page: joi.number().integer().min(1).default(1),
+    level: joi.number().integer().min(1).max(6).optional(),
+    search: joi.string().allow('').optional(),
   }),
 };
 

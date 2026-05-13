@@ -4,21 +4,47 @@ import { CirclePlay, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { IVideoItem } from "@/src/types/interface";
 import Button from "@/src/components/atoms/button";
+import { useAppDispatch } from "@/src/hooks/useHookReducers";
+import useNotification from "@/src/hooks/useNotification";
+import { saveVideo } from "@/src/services/video/video_save";
+import { Modal } from "antd";
 
 interface VideoItemProps {
   video: IVideoItem;
   footer?: boolean;
+  onUpdated?: () => void;
 }
 
-const VideoItem = ({ video, footer }: VideoItemProps) => {
+const VideoItem = ({ video, footer, onUpdated }: VideoItemProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const router = useRouter();
+  const [videoSave, setVideoSave] = useState(false);
+  const dispatch = useAppDispatch();
+  const { notify } = useNotification();
+
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const handlePlay = () => setIsPlaying(true);
   const formatViews = (views: number) => {
     if (views >= 1_000_000) return (views / 1_000_000).toFixed(1) + "M";
     if (views >= 1_000) return (views / 1_000).toFixed(1) + "K";
     return views.toString();
+  };
+
+  const handleSaveVideo = async () => {
+    try {
+      const res = await dispatch(saveVideo({ videoId: video._id })).unwrap();
+
+      setVideoSave(res.saved);
+
+      if (res.saved) {
+        notify("success", "Lưu video thành công");
+      } else {
+        notify("success", "Bỏ lưu video thành công");
+      }
+    } catch (error) {
+      notify("error", "Có lỗi xảy ra");
+    }
   };
   return (
     <div
@@ -100,11 +126,33 @@ const VideoItem = ({ video, footer }: VideoItemProps) => {
           >
             Xem tiếp
           </Button>
-          <button className="w-12 h-8 border border-red-400 text-red-500 rounded-full flex items-center justify-center hover:bg-red-50 cursor-pointer">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsDeleteOpen(true);
+            }}
+            className="w-12 h-8 border border-red-400 text-red-500 rounded-full flex items-center justify-center hover:bg-red-50 cursor-pointer"
+          >
             <Trash2 size={16} />
           </button>
         </div>
       )}
+      <Modal
+        title="Xác nhận"
+        open={isDeleteOpen}
+        onCancel={() => setIsDeleteOpen(false)}
+        centered
+        onOk={async () => {
+          await handleSaveVideo();
+          setIsDeleteOpen(false);
+          onUpdated?.();
+        }}
+        okText="Xoá"
+        cancelText="Huỷ"
+        okButtonProps={{ danger: true }}
+      >
+        <p>Bạn có chắc muốn xoá video này không?</p>
+      </Modal>
     </div>
   );
 };

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import apiConstant from "@/src/constants/api.constant";
 import { RequestMethod } from "@/src/hooks/useHookReducers";
 import {
@@ -9,12 +10,15 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const getTopic = createAsyncThunk<IVocabularyTopic[], void>(
   "vocabulary-topic/getTopic",
-  async (_, { rejectWithValue }) => {
+  async (params: any, { rejectWithValue }) => {
     try {
       const result = await RequestMethod.get(
         apiConstant.vocabularyTopic.getAll,
+        {
+          params,
+        },
       );
-      return result.data.data.data;
+      return result.data.data.topics;
     } catch (err) {
       return rejectWithValue(err);
     }
@@ -23,16 +27,27 @@ export const getTopic = createAsyncThunk<IVocabularyTopic[], void>(
 
 export const getVocabulary = createAsyncThunk<
   IVocabularyResponse,
-  { topicId?: string; page?: number; pageSize?: number }
+  {
+    topicId?: string;
+    page?: number;
+    pageSize?: number;
+    level?: number;
+    keyword?: string;
+  }
 >(
   "vocabulary/getAll",
-  async ({ topicId, page = 1, pageSize = 10 }, { rejectWithValue }) => {
+  async (
+    { topicId, page = 1, pageSize = 10, level, keyword },
+    { rejectWithValue },
+  ) => {
     try {
       const result = await RequestMethod.get("/vocabulary", {
         params: {
           topicId,
           page,
           pageSize,
+          level,
+          keyword,
         },
       });
 
@@ -48,6 +63,28 @@ export const getDaily = createAsyncThunk<IVocabulary[], void>(
   async (_, { rejectWithValue }) => {
     try {
       const result = await RequestMethod.get(apiConstant.vocabulary.getDaily);
+      return result.data.data;
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  },
+);
+
+export const addVocabularyToFlashcard = createAsyncThunk<
+  any,
+  { deckId: string; vocabularyId: string }
+>(
+  "flashcard/addVocabulary",
+  async ({ deckId, vocabularyId }, { rejectWithValue }) => {
+    try {
+      const result = await RequestMethod.post(
+        apiConstant.vocabulary.addToDeck,
+        {
+          deckId,
+          vocabularyId,
+        },
+      );
+
       return result.data.data;
     } catch (err) {
       return rejectWithValue(err);

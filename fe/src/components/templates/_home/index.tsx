@@ -1,30 +1,85 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { BookA, CirclePlay, Clock, Flame, Trophy } from "lucide-react";
 import Button from "../../atoms/button";
-import "./style.scss";
 import { Card, CardContent } from "../../atoms/card";
 import { useRouter } from "next/navigation";
+import { useAppDispatch } from "@/src/hooks/useHookReducers";
+import useNotification from "@/src/hooks/useNotification";
+import { useEffect, useState } from "react";
+import { getLearningStats } from "@/src/services/users";
+import { getGrammarSidebar } from "@/src/services/grammar";
+import { getFlashcardStats } from "@/src/services/flashCardDeck";
+import { getAllVideo } from "@/src/services/video";
+import { IVideoItem } from "@/src/types/interface";
 function Home() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { notify } = useNotification();
+
+  const [stats, setStats] = useState({
+    totalCards: 0,
+    totalCompleted: 0,
+    progress: "0%",
+    streak: "0 ngày",
+  });
+
+  const [stats1, setStats1] = useState({
+    totalLessons: 0,
+    completedLessons: 0,
+    percent: 0,
+  });
+
+  const [stats2, setStats2] = useState({
+    studyTime: "0 phút",
+  });
+
+  const [videos, setVideos] = useState<IVideoItem[]>([]);
+
+  const fetchData = async () => {
+    try {
+      const res = await dispatch(getFlashcardStats()).unwrap();
+      const res1 = await dispatch(getGrammarSidebar()).unwrap();
+      const res2 = await dispatch(getLearningStats()).unwrap();
+      const res3 = await dispatch(
+        getAllVideo({
+          page: 1,
+          pageSize: 3,
+        }),
+      ).unwrap();
+
+      setStats(res);
+      setStats1(res1.stats);
+      setStats2(res2);
+      setVideos(res3.videos);
+      notify("success", "Lấy dữ liệu thành công");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const statis = [
     {
       label: "Chuỗi học tập",
-      value: "5 ngày",
+      value: stats.streak,
       icon: Flame,
       color: "text-orange-500",
       bg: "bg-orange-50",
     },
     {
       label: "Từ vựng đã học",
-      value: "342 từ",
+      value: `${stats.totalCompleted} từ`,
       icon: BookA,
       color: "text-blue-500",
       bg: "bg-blue-50",
     },
     {
       label: "Thời gian học",
-      value: "12h 30m",
+      value: stats2.studyTime,
       icon: Clock,
       color: "text-green-500",
       bg: "bg-green-50",
@@ -56,14 +111,14 @@ function Home() {
     {
       label: "Ngữ pháp HSK 3",
       value: "Các điểm ngữ pháp quan trọng",
-      percent: "15",
+      percent: stats1?.percent,
       bg: "bg-purple-500",
       link: "/grammar",
     },
     {
       label: "Flashcards ôn tập",
       value: "Ôn tập 50 từ vựng cũ",
-      percent: "80",
+      percent: Math.round((stats.totalCompleted / stats.totalCards) * 100),
       bg: "bg-orange-500",
       link: "/flashcards",
     },
@@ -74,17 +129,25 @@ function Home() {
     { label: "Phân biệt 的 得 地", value: "15:40• 3.4k lượt xem" },
     { label: "Từ vựng về Công nghệ", value: "08:15• 856 lượt xem" },
   ];
+
+  const formatViews = (views: number) => {
+    if (views >= 1_000_000) return (views / 1_000_000).toFixed(1) + "M";
+    if (views >= 1_000) return (views / 1_000).toFixed(1) + "K";
+    return views.toString();
+  };
+
   return (
     <div className="space-y-8">
       <div className="relative bg-linear-to-r from-primary to-rose-600 p-10 rounded-3xl text-white shadow-xl shadow-primary/20 overflow-hidden space-y-2">
-        <h1 className="text-4xl font-black mb-4">
-          Chào mừng trở lại, Học viên! 👋
-        </h1>
+        <h1 className="text-4xl font-black mb-4">Chào mừng bạn trở lại! 👋</h1>
         <p className="text-white/80 text-lg mb-8 max-w-lg">
-          Bạn đã duy trì chuỗi học tập 5 ngày liên tiếp. Hôm nay hãy tiếp tục ôn
+          Bạn đã duy trì chuỗi học tập {stats.streak}. Hôm nay hãy tiếp tục ôn
           tập từ vựng HSK 3 nhé!
         </p>
-        <Button className="bg-white text-primary! hover:bg-slate-200 font-bold px-8 h-12 rounded-2xl!">
+        <Button
+          className="bg-white text-primary! hover:bg-slate-200 font-bold px-8 h-12 rounded-2xl!"
+          onClick={() => router.push("/vocabulary")}
+        >
           Tiếp tục học
         </Button>
         <Button
@@ -164,25 +227,39 @@ function Home() {
           <h2 className="text-xl font-black space-y-4">Video gợi ý</h2>
 
           <div className="grid grid-cols-1 gap-4">
-            {video.map((item, index) => (
+            {videos.map((item, index) => (
               <Card
                 key={index}
                 className="group border shadow-sm cursor-pointer hover:shadow-md transition-shadow k hover:text-primary"
               >
-                <CardContent className="flex items-center gap-4 w-full! hover:">
-                  <div className="bg-gray-400 text-white py-4 px-8 rounded-2xl group-hover:bg-gray-300">
-                    <CirclePlay />
+                <CardContent
+                  className="flex items-center gap-4 w-full! hover:"
+                  onClick={() => router.push(`/video/${item._id}`)}
+                >
+                  <div
+                    className="text-white py-4 px-8 rounded-2xl bg-cover bg-center relative overflow-hidden"
+                    style={{ backgroundImage: `url(${item.thumbnail})` }}
+                  >
+                    <div className="absolute inset-0 bg-black/30" />
+                    <div className="relative">
+                      <CirclePlay />
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-black">{item.label}</p>
-                    <p className="text-xs text-slate-500 ">{item.value}</p>
+                    <p className="text-sm font-black">{item.title}</p>
+                    <p className="text-xs text-slate-500 ">
+                      {formatViews(item.views)} lượt xem • HSK {item.level}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
 
-          <Button className="w-full bg-white text-slate-600! shadow-none border hover:bg-slate-200">
+          <Button
+            className="w-full bg-white text-slate-600! shadow-none border hover:bg-slate-200"
+            onClick={() => router.push("/video")}
+          >
             Xem tất cả video
           </Button>
         </div>

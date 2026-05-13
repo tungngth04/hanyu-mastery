@@ -140,8 +140,4 @@ router.get('/', controller.getPinyin);
 
 router.post('/combine', controller.combine);
 
-router.post('/initial', controller.speakInitial);
-router.post('/final', controller.speakFinal);
-router.post('/speak', controller.speak);
-
 module.exports = router;

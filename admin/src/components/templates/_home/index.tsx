@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { BookOpen, FileText, Users, Video } from "lucide-react";
 import Button from "../../atoms/button";
@@ -9,7 +10,41 @@ import {
   CardTitle,
 } from "../../atoms/card";
 import { StatCard } from "../../atoms/statCard";
+import { useAppDispatch } from "@/src/hooks/useHookReducers";
+import useNotification from "@/src/hooks/useNotification";
+import { useEffect, useState } from "react";
+import { getDashboardOverview, getUserGrowth } from "@/src/services/user";
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from "recharts";
+
 function Home() {
+  const dispatch = useAppDispatch();
+  const { notify } = useNotification();
+
+  const [overview, setOverview] = useState<any>({});
+  const [growth, setGrowth] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const res1 = await dispatch(getDashboardOverview()).unwrap();
+        setOverview(res1);
+
+        const res2 = await dispatch(getUserGrowth()).unwrap();
+        setGrowth(res2);
+      } catch {
+        notify("error", "Không tải được dashboard");
+      }
+    };
+
+    fetchDashboard();
+  }, []);
+  const chartData = growth.map((item) => ({
+    date: item._id.slice(5), // lấy MM-DD cho gọn
+    users: item.count,
+  }));
+  console.log("first", overview);
+  console.log("2", growth);
+
   return (
     <>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -17,20 +52,17 @@ function Home() {
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
             Tổng quan hệ thống
           </h2>
-          <p className="text-slate-500 mt-1">
-            Xin chào, đây là tình hình hoạt động hôm nay.
-          </p>
         </div>
-        <div className="flex gap-2 w-full sm:w-auto">
+        {/* <div className="flex gap-2 w-full sm:w-auto">
           <button className="bg-white flex-1 sm:flex-none border-2 p-2 px-4 rounded-2xl cursor-pointer">
             Xuất báo cáo
           </button>
-        </div>
+        </div> */}
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-4">
         <StatCard
           title="Tổng học viên"
-          value="12,450"
+          value={overview.totalUsers || 0}
           icon={Users}
           color="text-blue-600"
           bg="bg-blue-50"
@@ -38,7 +70,7 @@ function Home() {
         />
         <StatCard
           title="Bài học Từ vựng"
-          value="450"
+          value={overview.totalVocabulary || 0}
           icon={BookOpen}
           color="text-emerald-600"
           bg="bg-emerald-50"
@@ -46,7 +78,7 @@ function Home() {
         />
         <StatCard
           title="Video bài giảng"
-          value="128"
+          value={overview.totalVideos || 0}
           icon={Video}
           color="text-violet-600"
           bg="bg-violet-50"
@@ -69,23 +101,14 @@ function Home() {
               Số lượng học viên đăng ký mới trong 7 ngày qua
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-6 h-75 flex items-end justify-between gap-2 pb-0">
-            {[40, 70, 45, 90, 65, 85, 120].map((height, i) => (
-              <div
-                key={i}
-                className="w-full flex flex-col items-center gap-2 group"
-              >
-                <div className="w-full bg-slate-100 rounded-t-lg relative h-62.5 flex items-end">
-                  <div
-                    className="w-full bg-primary/80 group-hover:bg-primary transition-colors rounded-t-lg"
-                    style={{ height: `${height}%` }}
-                  ></div>
-                </div>
-                <span className="text-xs text-slate-400 font-medium mb-2">
-                  T{i + 2}
-                </span>
-              </div>
-            ))}
+          <CardContent className="p-6 h-75">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData}>
+                <XAxis dataKey="date" />
+                <Tooltip />
+                <Bar dataKey="users" fill="#6366f1" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-sm rounded-2xl">

@@ -33,33 +33,25 @@ const SavedVideoPage = () => {
     "HSK 6",
   ];
 
+  const fetchData = async () => {
+    try {
+      const result = await dispatch(
+        getAllVideoSave({
+          page,
+          pageSize,
+          level: activeLevel,
+        }),
+      ).unwrap();
+      setVideos(result.videos);
+      setTotal(result.totalResults);
+      notify("success", "Lấy dữ liệu thành công");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
-    let isMounted = true;
-
-    const fetchData = async () => {
-      try {
-        const result = await dispatch(
-          getAllVideoSave({
-            page,
-            pageSize,
-            level: activeLevel,
-          }),
-        ).unwrap();
-        if (isMounted && result) {
-          setVideos(result.videos);
-          setTotal(result.totalResults);
-          notify("success", "Lấy dữ liệu thành công");
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
     fetchData();
-
-    return () => {
-      isMounted = false;
-    };
   }, [page, pageSize, activeLevel]);
 
   const handleChangePage = (page: number, pageSize: number) => {
@@ -120,7 +112,12 @@ const SavedVideoPage = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {videos.map((item) => (
-              <VideoItem key={item._id} video={item} footer={true} />
+              <VideoItem
+                key={item._id}
+                video={item}
+                footer={true}
+                onUpdated={() => fetchData()}
+              />
             ))}
           </div>
         )}
