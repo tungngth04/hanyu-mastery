@@ -70,9 +70,6 @@ const assessPronunciation = catchAsync(async (req, res) => {
 
           const json = JSON.parse(raw);
 
-          // console.log('FULL RESULT:');
-          // console.dir(json, { depth: null });
-
           const words = json.NBest?.[0]?.Words || [];
 
           const phonemeDetails = words.map((word) => ({

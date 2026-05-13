@@ -15,7 +15,6 @@ const getAllExams = catchAsync(async (req, res) => {
 
   const skip = (+page - 1) * +pageSize;
 
-  // ===== FILTER =====
   const filter = {
     deleted: false,
     ...(level && { level: Number(level) }),
@@ -24,10 +23,8 @@ const getAllExams = catchAsync(async (req, res) => {
     }),
   };
 
-  // ===== QUERY =====
   const exams = await HSKExam.find(filter).sort({ createdAt: -1 }).skip(skip).limit(+pageSize).lean();
 
-  // ===== COUNT =====
   const total = await HSKExam.countDocuments(filter);
 
   res.status(200).json({

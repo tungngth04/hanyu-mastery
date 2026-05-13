@@ -16,7 +16,7 @@ const getAllFlashcardDeck = catchAsync(async (req, res) => {
     $match: {
       ...(level &&
         level !== 'Tất cả' && {
-          level: Number(level.replace('HSK ', '')), // "HSK 1" -> 1
+          level: Number(level.replace('HSK ', '')),
         }),
       ...(search && {
         $or: [{ title: { $regex: search, $options: 'i' } }, { topic: { $regex: search, $options: 'i' } }],
