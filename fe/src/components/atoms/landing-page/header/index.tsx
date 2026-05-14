@@ -26,7 +26,9 @@ const Header = () => {
     <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white/80 backdrop-blur-md z-50">
       <div className="flex items-center gap-2 font-bold text-xl text-primary">
         <Image
-          src={"/images/logo.png"}
+          src={
+            "https://res.cloudinary.com/djjo6qxj6/image/upload/v1778730421/logo-removebg-preview_nzm3rr.png"
+          }
           alt="logo.png"
           width={200}
           height={75}
