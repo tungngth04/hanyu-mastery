@@ -60,6 +60,12 @@ const apiConstant = {
     deleteLesson: (id: string) => `/grammar/lesson/${id}`,
     getAllTopics: "/grammar/grammar-topics",
   },
+  hskExam: {
+    getAll: "/hsk-exam",
+    create: "/hsk-exam",
+    update: (id: string) => `/hsk-exam/${id}`,
+    delete: (id: string) => `/hsk-exam/${id}`,
+  },
 };
 
 export default apiConstant;
