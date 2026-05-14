@@ -63,7 +63,7 @@ const Banner = () => {
         <div className="relativezoom-in delay-200">
           <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl border-8 border-white hover:scale-110 transition-transform hover:shadow-3xl">
             <Image
-              src="/Images/banner.jpg"
+              src="https://res.cloudinary.com/djjo6qxj6/image/upload/v1778729929/banner_godxf8.jpg"
               alt="banner img"
               className="w-full aspect-4/3 object-cover"
               width={800}
